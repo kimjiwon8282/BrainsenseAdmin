@@ -10,5 +10,7 @@ app.get('/', (req, res) => {
     res.send('관리자 메인페이지');
 });
 
+console.log("김대기 테스트");
+
 
 
