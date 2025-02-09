@@ -1,0 +1,74 @@
+/* styles.css 파일 */
+
+/* 페이지 전체 높이를 브라우저 창에 맞추기 */
+html, body {
+    height: 100%; /* 브라우저 창 높이에 맞춤 */
+    margin: 0; /* 기본 여백 제거 */
+    display: flex; /* 플렉스 박스 사용 */
+    flex-direction: column; /* 세로 방향으로 정렬 */
+}
+
+/* 본문 컨테이너가 남은 공간을 채우도록 설정 */
+.container {
+    flex: 2; /* 본문 영역을 남은 공간에 맞춤 */
+}
+
+/* Footer 고정 스타일 */
+footer {
+    background-color: rgba(0, 0, 0, 0.05);
+    text-align: center;
+    padding: 10px 0;
+    width: 100%; /* 가로 전체 */
+}
+
+.navbar-brand img {
+    display: block;
+    max-height: 50px; /* 로고 높이를 40px로 제한 */
+    max-width: 300px; /* 로고 가로 크기를 200px로 제한 */
+    height: auto;
+    width: auto;
+    margin: 0;
+    padding: 0;
+}
+
+/* 모바일 화면 (768px 이하) */
+@media (max-width: 768px) {
+    .navbar-brand img {
+        height: 30px; /* 모바일 화면에서는 크기를 줄임 */
+    }
+}
+
+.card-text span {
+    white-space: pre-wrap;
+    display: block;
+    margin-bottom: 5px; /* 문장 간 간격 추가 */
+}
+
+.space {
+    height: 20px; /* 원하는 높이 설정 */
+    width: 100%; /* 가로는 전체 너비 */
+    display: block; /* 블록 요소로 설정 */
+    background: none; /* 배경 없음 */
+    margin: 0; /* 여백 초기화 */
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 카드 내부 요소 간의 간격을 조정 */
+    height: 100%; /* 카드 높이를 동일하게 설정 */
+}
+
+.card-body {
+    flex-grow: 1; /* 카드 내용 부분이 남은 공간을 채우도록 설정 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 텍스트와 버튼 사이를 적절히 분배 */
+}
+
+.card-body .btn {
+    align-self: center; /* 버튼을 가로로 중앙 정렬 */
+    margin-top: auto; /* 버튼을 카드 하단에 배치 */
+}
+
+
