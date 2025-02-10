@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 페이지</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icon-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <!-- 상단 네비게이션 바 -->
+    <nav class="navbar navbar-light bg-light px-3 d-flex justify-content-center">
+        <!-- 로고 (가운데 정렬: 작은 화면에서만 표시) -->
+        <a class="navbar-brand d-lg-none" href="/">
+            <img src="/images/logo.svg" alt="브레인센스_로고">
+        </a>
+
+        <!-- 로고 (왼쪽 정렬: 큰 화면에서만 표시) -->
+        <a class="navbar-brand d-none d-lg-block" href="#">
+            <img src="/images/logo.svg" alt="브레인센스_로고">
+        </a>
+    </nav>
+
+    <body class="bg-light">
+
+        <div class="container vh-100 d-flex align-items-center justify-content-center">
+            <div class="row shadow rounded-3 bg-white overflow-hidden" style="width: 1000px; max-width: 100%;">
+                <!-- Left Section: Image -->
+                <div class="col-md-6 p-0">
+                    <img src="/images/adminlogin.webp" alt="Sign In Image" class="img-fluid w-100 h-100" style="object-fit: cover;">
+                </div>
+                <!-- Right Section: Login Form -->
+                <div class="col-md-6 p-5 d-flex flex-column justify-content-center">
+                    <h3 class="mb-4 text-center">Sign In</h3>
+                    <form>
+                <!-- Email Input -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <div class="input-group align-items-center">
+                        <!-- 아이디 입력 -->
+                        <input type="text" id="email" class="form-control" placeholder="Enter your ID" required style="max-width: 50%;">
+                        <!-- "@" 표시 -->
+                        <span class="input-group-text">@</span>
+                        <!-- 도메인 선택 -->
+                        <select class="form-select text-center" id="emailDomain" required>
+                            <option value="gmail.com">gmail.com</option>
+                            <option value="yahoo.com">yahoo.com</option>
+                            <option value="outlook.com">outlook.com</option>
+                            <option value="naver.com">naver.com</option>
+                            <option value="daum.net">daum.net</option>
+                        </select>
+                    </div>
+                </div>
+
+                        <!-- Password Input -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
+                        </div>
+                        <!-- Login Button -->
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
+                    </form>
+                    <!-- Signup Link -->
+                    <div class="text-center">
+                        <a href="/signup" class="text-decoration-none">Create an account</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+
+    <!-- Footer -->
+    <footer class="bg-light text-center text-lg-start mt-5">
+        <!-- Copyright -->
+        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
+            © 2025 브레인센스. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS and Icons -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</body>
+</html>

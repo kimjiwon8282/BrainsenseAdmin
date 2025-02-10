@@ -1,22 +1,38 @@
 const express = require('express');
+const path = require('path');
+
 const app = express();
-const port = 8081;
+const PORT = 8081;
 
-app.listen(port, () => {
-    console.log(`Admin server listening on port ${port}`);
+// EJS 설정
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+// 정적 파일 제공
+app.use(express.static(path.join(__dirname, 'public')));
+
+// 라우트 설정
+app.get('/main', (req, res) => {
+    res.render('admin_main');
 });
 
-app.get('/', (req, res) => {
-    res.send('관리자 메인페이지');
+app.get('/admin_crud', (req, res) => {
+    res.render('admin_crud');
 });
 
-<<<<<<< HEAD
-console.log("김대기 테스트");
-
-=======
-app.get('/test',(req,res)=>{
-    res.send("테스트 용도 입니다다")
+app.get('/admin_list', (req, res) => {
+    res.render('admin_list');
 });
->>>>>>> develop
 
+app.get('/admin_statistics', (req, res) => {
+    res.render('admin_statistics');
+});
 
+app.get('/logout', (req, res) => {
+    res.render('admin_login');
+});
+
+// 서버 실행
+app.listen(PORT, () => {
+    console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
+});
