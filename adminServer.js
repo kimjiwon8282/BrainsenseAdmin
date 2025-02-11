@@ -1,3 +1,4 @@
+require('dotenv').config(); // 환경 변수 로드
 const express = require('express');
 const path = require('path');
 
@@ -10,6 +11,10 @@ app.set('views', path.join(__dirname, 'views'));
 
 // 정적 파일 제공
 app.use(express.static(path.join(__dirname, 'public')));
+
+// 데이터베이스 연결
+const dbConnect = require('./config/dbConnect'); // 데이터베이스 연결 함수 불러오기
+dbConnect(); // MongoDB 연결
 
 // 라우트 설정
 app.get('/main', (req, res) => {
