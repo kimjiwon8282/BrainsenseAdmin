@@ -12,99 +12,127 @@
     <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
-
     <!-- 상단 네비게이션 바 -->
     <nav class="navbar navbar-light bg-light px-3">
         <!-- 로고 (가운데 정렬: 작은 화면에서만 표시) -->
         <a class="navbar-brand d-lg-none" href="/">
             <img src="/images/logo.svg" alt="브레인센스_로고">
         </a>
-
         <!-- 로고 (왼쪽 정렬: 큰 화면에서만 표시) -->
         <a class="navbar-brand d-none d-lg-block" href="/main">
             <img src="/images/logo.svg" alt="브레인센스_로고">
         </a>
-
         <div class="d-flex justify-content-end align-items-center gap-2">
             <!-- 큰 화면에서 표시되는 버튼 -->
             <button class="btn btn-primary d-none d-lg-block" onclick="location.href='https://www.naver.com'">
                 회사 홈페이지로 이동
             </button>
-        
             <!-- 작은 화면에서 표시되는 홈 아이콘 버튼 -->
             <button class="btn btn-primary d-lg-none" onclick="location.href='https://www.naver.com'">
                 <i class="bi bi-house text-white"></i>
             </button>
-        
             <!-- 로그아웃 버튼 (큰 화면에서만 표시) -->
             <button class="btn btn-danger d-none d-lg-block" onclick="location.href='/logout'">
                 로그아웃
             </button>
-        
             <!-- 로그아웃 아이콘 (작은 화면에서만 표시) -->
             <button class="btn btn-danger d-lg-none" onclick="location.href='/logout'">
                 <i class="bi bi-box-arrow-right text-white"></i>
             </button>
         </div>
-        
-        
     </nav>
-
-    <!-- 본문 컨테이너 -->
     <div class="container mt-5">
-        <div class="row g-4">
-            <!-- 카드 1 -->
-            <div class="col-md-6 mb-4"> <!-- col-md-6으로 크기 변경 -->
-                <div class="card h-100">
-                    <img src="/images/posting.webp" class="card-img-top" alt="blogImage">
-                    <div class="card-body">
-                        <h3 class="card-title text-center"><strong>📋 새 게시글 등록</strong></h3><hr>
-                        <p class="card-text">
-                            <span>🔹 최신 정보를 사용자와 공유하기 위해 새로운 게시글을 작성하세요.</span>
-                            <span>🔹 공지사항, 업데이트 소식, 뉴스 등 유익한 정보를 빠르게 전달하세요.</span>
-                        </p>
-                        <div class="text-end">
-                            <button class="btn btn-primary" onclick="location.href='/admin_crud'">
-                                📝 새 게시글 등록하기 <i class="bi bi-arrow-right"></i>
-                            </button>
-                        </div>
-                    </div>
+        <h2 class="mb-4">게시글 관리</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>제목</th>
+                    <th>관리</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% posts.forEach((post, index) => { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= post.title %></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal" data-id="<%= post._id %>" data-title="<%= post.title %>" data-content="<%= post.content %>">수정하기</button>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+    <!-- 수정 모달 -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">게시글 수정</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            </div>
-    
-            <!-- 카드 2 -->
-            <div class="col-md-6 mb-4"> <!-- col-md-6으로 크기 변경 -->
-                <div class="card h-100">
-                    <img src="/images/list.webp" class="card-img-top" alt="listImage">
-                    <div class="card-body">
-                        <h3 class="card-title text-center"><strong>✏️ 게시글 수정 및 관리</strong></h3><hr>
-                        <p class="card-text">
-                            <span>🔹 이미 등록된 게시글의 내용을 수정하고 최신 정보로 업데이트하세요.</span>
-                            <span>🔹 잘못된 정보나 변경된 내용을 쉽게 수정하여 신뢰도를 유지할 수 있습니다.</span>
-                            <span>🔹 필요에 따라 게시글을 삭제하거나 비공개 설정을 할 수 있습니다.</span>
-                        </p>
-                        <div class="text-end">
-                            <button class="btn btn-primary" onclick="location.href='/admin_list'">
-                                🔧 게시글 수정하기 <i class="bi bi-arrow-right"></i>
-                            </button>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" id="postId" name="postId">
+                        <div class="mb-3">
+                            <label for="postTitle" class="form-label">제목</label>
+                            <input type="text" class="form-control" id="postTitle" name="title" required>
                         </div>
-                    </div>
+                        <div class="mb-3">
+                            <label for="postContent" class="form-label">내용</label>
+                            <textarea class="form-control" id="postContent" name="content" rows="4" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success">저장</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-    
-
     <!-- Footer -->
     <footer class="bg-light text-center text-lg-start mt-5">
-        <!-- Copyright -->
         <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
             © 2025 브레인센스. All rights reserved.
         </div>
     </footer>
-
     <!-- Bootstrap JS and Icons -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- jQuery 추가 (Bootstrap JS 아래에 위치) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let editModal = document.getElementById("editModal");
+            editModal.addEventListener("show.bs.modal", function(event) {
+                let button = event.relatedTarget;
+                let postId = button.getAttribute("data-id");
+                let postTitle = button.getAttribute("data-title");
+                let postContent = button.getAttribute("data-content");
+                document.getElementById("postId").value = postId;
+                document.getElementById("postTitle").value = postTitle;
+                document.getElementById("postContent").value = postContent;
+            });
+            document.getElementById("editForm").addEventListener("submit", function(event) {
+                event.preventDefault();
+                let postId = document.getElementById("postId").value;
+                let title = document.getElementById("postTitle").value;
+                let content = document.getElementById("postContent").value;
+                $.ajax({
+                    url: "/api/posts/" + postId,
+                    method: "PUT",
+                    contentType: "application/json",
+                    data: JSON.stringify({ title: title, content: content }),
+                    success: function(response) {
+                        alert("게시글이 수정되었습니다.");
+                        location.reload();
+                    },
+                    error: function() {
+                        console.log("수정오류",error);
+                        alert("수정에 실패했습니다.");
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
