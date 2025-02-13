@@ -15,6 +15,7 @@ dbConnect(); // MongoDB 연결
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use(cors()); // 프론트엔드와 통신할 때 필요한 경우 추가
 
 

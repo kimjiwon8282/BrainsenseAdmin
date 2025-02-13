@@ -8,41 +8,40 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icon-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Pretendard 폰트 추가 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <!-- Custom CSS -->
     <link href="/css/style.css" rel="stylesheet">
 </head>
 <body>
     <!-- 상단 네비게이션 바 -->
     <nav class="navbar navbar-light bg-light px-3">
-        <!-- 로고 (가운데 정렬: 작은 화면에서만 표시) -->
         <a class="navbar-brand d-lg-none" href="/">
             <img src="/images/logo.svg" alt="브레인센스_로고">
         </a>
-        <!-- 로고 (왼쪽 정렬: 큰 화면에서만 표시) -->
         <a class="navbar-brand d-none d-lg-block" href="/main">
             <img src="/images/logo.svg" alt="브레인센스_로고">
         </a>
         <div class="d-flex justify-content-end align-items-center gap-2">
-            <!-- 큰 화면에서 표시되는 버튼 -->
             <button class="btn btn-primary d-none d-lg-block" onclick="location.href='https://www.naver.com'">
                 회사 홈페이지로 이동
             </button>
-            <!-- 작은 화면에서 표시되는 홈 아이콘 버튼 -->
             <button class="btn btn-primary d-lg-none" onclick="location.href='https://www.naver.com'">
                 <i class="bi bi-house text-white"></i>
             </button>
-            <!-- 로그아웃 버튼 (큰 화면에서만 표시) -->
             <button class="btn btn-danger d-none d-lg-block" onclick="location.href='/logout'">
                 로그아웃
             </button>
-            <!-- 로그아웃 아이콘 (작은 화면에서만 표시) -->
             <button class="btn btn-danger d-lg-none" onclick="location.href='/logout'">
                 <i class="bi bi-box-arrow-right text-white"></i>
             </button>
         </div>
     </nav>
     <div class="container mt-5">
-        <h2 class="mb-4">게시글 관리</h2>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>게시글 관리</h2>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newPostModal">새로운 게시글 작성하기</button>
+        </div>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -55,33 +54,77 @@
                 <% posts.forEach((post, index) => { %>
                 <tr>
                     <td><%= index + 1 %></td>
-                    <td><%= post.title %></td>
                     <td>
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal" data-id="<%= post._id %>" data-title="<%= post.title %>" data-content="<%= post.content %>">수정하기</button>
+                        <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#viewPostModal"
+                            data-title="<%= post.title %>" data-content="<%= post.content %>" data-images='<%= JSON.stringify(post.images || []) %>'>
+                            <%= post.title %>
+                        </a>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal" data-id="<%= post._id %>" data-title="<%= post.title %>" data-content="<%= post.content %>" data-images='<%= JSON.stringify(post.images || []) %>'>수정하기</button>
+                        <button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= post._id %>')">삭제하기</button>
                     </td>
                 </tr>
                 <% }) %>
             </tbody>
         </table>
     </div>
-    <!-- 수정 모달 -->
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+    
+    <!-- 게시글 보기 모달 -->
+    <div class="modal fade" id="viewPostModal" tabindex="-1" aria-labelledby="viewPostModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">게시글 수정</h5>
+                    <h5 class="modal-title" id="viewPostModalLabel">게시글 보기</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="editForm">
-                        <input type="hidden" id="postId" name="postId">
+                    <!-- 📌 이미지 캐러셀 (이미지 없을 때 기본 배경 추가) -->
+                    <div id="viewPostCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner" id="viewPostImages">
+                            <!-- 여기에 이미지가 동적으로 추가됨 -->
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#viewPostCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#viewPostCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 id="viewPostTitle" class="mt-5"></h5>
+                        <small id="viewPostTime" class="text-muted"></small>
+                    </div>
+                    <hr>
+                    <p id="viewPostContent"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 게시글 작성 모달 -->
+    <div class="modal fade" id="newPostModal" tabindex="-1" aria-labelledby="newPostModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newPostModalLabel">새로운 게시글 작성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newPostForm" enctype="multipart/form-data">
                         <div class="mb-3">
-                            <label for="postTitle" class="form-label">제목</label>
-                            <input type="text" class="form-control" id="postTitle" name="title" required>
+                            <label for="newPostTitle" class="form-label">제목</label>
+                            <input type="text" class="form-control" id="newPostTitle" name="title" required>
                         </div>
                         <div class="mb-3">
-                            <label for="postContent" class="form-label">내용</label>
-                            <textarea class="form-control" id="postContent" name="content" rows="4" required></textarea>
+                            <label for="newPostContent" class="form-label">내용</label>
+                            <textarea class="form-control" id="newPostContent" name="content" rows="4" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPostImages" class="form-label">이미지 첨부</label>
+                            <input type="file" class="form-control" id="newPostImages" name="images" multiple accept=".png, .jpg, .jpeg, .gif, .webp, .svg">
+                            <small class="text-muted">📌 업로드 가능 확장자: <strong>.png, .jpg, .jpeg, .gif, .webp, .svg</strong></small><br>
+                            <small class="text-muted">📁 업로드 가능 크기: <strong>5MB 이내 파일 크기만 업로드 가능</strong></small>
                         </div>
                         <button type="submit" class="btn btn-success">저장</button>
                     </form>
@@ -89,50 +132,59 @@
             </div>
         </div>
     </div>
-    <!-- Footer -->
+
+    <!-- 📌 게시글 수정 모달 -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">게시글 수정</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm" enctype="multipart/form-data">
+                        <input type="hidden" id="postId" name="postId"> <!-- 게시글 ID 저장 -->
+
+                        <div class="mb-3">
+                            <label for="postTitle" class="form-label">제목</label>
+                            <input type="text" class="form-control" id="postTitle" name="title" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="postContent" class="form-label">내용</label>
+                            <textarea class="form-control" id="postContent" name="content" rows="4" required></textarea>
+                        </div>
+
+                        <!-- 📌 기존 이미지 미리보기 -->
+                        <div class="mb-3">
+                            <label class="form-label">현재 이미지</label>
+                            <div id="currentImagesContainer"></div>
+                        </div>
+
+                        <!-- 📌 새 이미지 업로드 -->
+                        <div class="mb-3">
+                            <label for="editPostImages" class="form-label">새 이미지 추가</label>
+                            <input type="file" class="form-control" id="editPostImages" name="images" multiple accept=".png, .jpg, .jpeg, .gif, .webp, .svg">
+                            <small class="text-muted">📌 업로드 가능 확장자: <strong>.png, .jpg, .jpeg, .gif, .webp, .svg</strong></small><br>
+                            <small class="text-muted">📁 업로드 가능 크기: <strong>5MB 이내 파일 크기만 업로드 가능</strong></small>
+                            <div id="imagePreview"></div> <!-- 새 이미지 미리보기 -->
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">수정 완료</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <footer class="bg-light text-center text-lg-start mt-5">
         <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.05);">
             © 2025 브레인센스. All rights reserved.
         </div>
     </footer>
-    <!-- Bootstrap JS and Icons -->
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery 추가 (Bootstrap JS 아래에 위치) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            let editModal = document.getElementById("editModal");
-            editModal.addEventListener("show.bs.modal", function(event) {
-                let button = event.relatedTarget;
-                let postId = button.getAttribute("data-id");
-                let postTitle = button.getAttribute("data-title");
-                let postContent = button.getAttribute("data-content");
-                document.getElementById("postId").value = postId;
-                document.getElementById("postTitle").value = postTitle;
-                document.getElementById("postContent").value = postContent;
-            });
-            document.getElementById("editForm").addEventListener("submit", function(event) {
-                event.preventDefault();
-                let postId = document.getElementById("postId").value;
-                let title = document.getElementById("postTitle").value;
-                let content = document.getElementById("postContent").value;
-                $.ajax({
-                    url: "/api/posts/" + postId,
-                    method: "PUT",
-                    contentType: "application/json",
-                    data: JSON.stringify({ title: title, content: content }),
-                    success: function(response) {
-                        alert("게시글이 수정되었습니다.");
-                        location.reload();
-                    },
-                    error: function() {
-                        console.log("수정오류",error);
-                        alert("수정에 실패했습니다.");
-                    }
-                });
-            });
-        });
-    </script>
+    <script src="/js/admin_crud_script.js"></script>
 </body>
 </html>
