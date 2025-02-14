@@ -45,9 +45,11 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>순번</th>
                     <th>제목</th>
                     <th>관리</th>
+                    <th>생성일자</th>
+                    <th>수정일자</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,17 +58,40 @@
                     <td><%= index + 1 %></td>
                     <td>
                         <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#viewPostModal"
-                            data-title="<%= post.title %>" data-content="<%= post.content %>" data-images='<%= JSON.stringify(post.images || []) %>'>
+                            data-title="<%= post.title %>"
+                            data-content="<%= post.content %>"
+                            data-images='<%= JSON.stringify(post.images || []) %>'
+                            data-created-at="<%= post.createdAt %>"
+                            data-updated-at="<%= post.updatedAt %>">
                             <%= post.title %>
                         </a>
                     </td>
                     <td>
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal" data-id="<%= post._id %>" data-title="<%= post.title %>" data-content="<%= post.content %>" data-images='<%= JSON.stringify(post.images || []) %>'>수정하기</button>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal"
+                            data-id="<%= post._id %>"
+                            data-title="<%= post.title %>"
+                            data-content="<%= post.content %>"
+                            data-images='<%= JSON.stringify(post.images || []) %>'
+                            data-created-at="<%= post.createdAt %>"
+                            data-updated-at="<%= post.updatedAt %>">
+                            수정하기
+                        </button>
                         <button class="btn btn-danger btn-sm" onclick="confirmDelete('<%= post._id %>')">삭제하기</button>
+                    </td>
+                    <!-- 📌 생성일자 표시 -->
+                    <td><%= new Date(post.createdAt).toLocaleString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" }) %></td>
+                    <!-- 📌 수정일자 표시 (생성일자와 다를 경우만 표시) -->
+                    <td>
+                        <% if (post.updatedAt && post.createdAt !== post.updatedAt) { %>
+                            <%= new Date(post.updatedAt).toLocaleString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" }) %>
+                        <% } else { %>
+                            -
+                        <% } %>
                     </td>
                 </tr>
                 <% }) %>
             </tbody>
+            
         </table>
     </div>
     

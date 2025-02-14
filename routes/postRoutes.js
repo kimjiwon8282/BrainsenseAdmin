@@ -5,7 +5,6 @@ const multer = require('multer'); //이미지 처리를 위한 multer
 const fs = require('fs').promises;
 const path = require('path'); // 파일 경로 추가
 const { v4: uuidv4 } = require('uuid'); // UUID 생성 라이브러리
-const { timeStamp } = require('console');
 
 // 📌 Multer 설정 (이미지를 'uploads/' 폴더에 저장)
 const storage = multer.diskStorage({
