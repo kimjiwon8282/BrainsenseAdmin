@@ -1,29 +1,33 @@
 const express = require('express');
 const router = express.Router();
 const Post = require('../models/Post');
-const multer = require('multer'); //이미지 처리를 위한 multer
+const multer = require('multer');
 const fs = require('fs').promises;
-const path = require('path'); // 파일 경로 추가
-const { v4: uuidv4 } = require('uuid'); // UUID 생성 라이브러리
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 
-// 📌 Multer 설정 (이미지를 'uploads/' 폴더에 저장)
+// 📌 Multer 설정 (파일을 'uploads/' 폴더에 저장)
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'public/uploads/'); // 저장 경로
     },
     filename: function (req, file, cb) {
-        const ext = path.extname(file.originalname).toLowerCase(); // 파일 확장자 추출 (.png, .jpg 등)
-        const safeFilename = file.originalname.replace(/[^a-zA-Z0-9]/g, '_'); // 특수문자 제거
-        const newFilename = `${uuidv4()}${ext}`; // UUID + 안전한 파일명
+        const ext = path.extname(file.originalname).toLowerCase(); // 확장자 추출
+        const newFilename = `${Date.now()}${ext}`; // UUID + 안전한 파일명
         cb(null, newFilename);
     }
 });
 
-const upload = multer({ storage: storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
+const upload = multer({ 
+    storage: storage, 
+    limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+// 📌 게시글 조회 (GET /api/posts)
 router.get('/api/posts', async (req, res) => {
     try {
-        const posts = await Post.find({}).sort({createdAt:-1});
+        const posts = await Post.find({}).sort({ createdAt: -1 });
         res.render('admin_crud', { posts });
     } catch (err) {
         console.error("게시글 조회 오류:", err);
@@ -31,13 +35,20 @@ router.get('/api/posts', async (req, res) => {
     }
 });
 
-// 📌 새 게시글 추가 (이미지 업로드 포함)
-router.post('/api/posts', upload.array('images', 5), async (req, res) => {
+// 📌 새 게시글 추가 (파일 업로드 포함)
+router.post('/api/posts', upload.array('attachments', 5), async (req, res) => {
     try {
         const { title, content } = req.body;
-        const imageUrls = req.files.map(file => `/uploads/${file.filename}`); // 파일 URL 생성
+        const files = req.files || [];
 
-        const newPost = new Post({ title, content, images: imageUrls });
+        // 📌 업로드 개수 확인
+        if (files.length > 5) {
+            return res.status(400).json({ error: "최대 업로드 파일 수(5개)를 초과했습니다." });
+        }
+
+        const fileUrls = req.files.map(file => `/uploads/${file.filename}`); // 파일 URL 생성
+
+        const newPost = new Post({ title, content, attachments: fileUrls });
         await newPost.save();
 
         res.status(201).json(newPost);
@@ -48,28 +59,28 @@ router.post('/api/posts', upload.array('images', 5), async (req, res) => {
 });
 
 // 📌 게시글 수정 API (PUT /api/posts/:id)
-router.put("/api/posts/:id", upload.array("images", 5), async (req, res) => {
+router.put("/api/posts/:id", upload.array("attachments", 5), async (req, res) => {
     try {
         const postId = req.params.id;
-        const { title, content, deletedImages } = req.body;
+        const { title, content, deletedAttachments } = req.body;
 
         const existingPost = await Post.findById(postId);
         if (!existingPost) {
             return res.status(404).json({ error: "게시글을 찾을 수 없습니다." });
         }
 
-        let updatedImages = existingPost.images || [];
+        let updatedAttachments = existingPost.attachments || [];
 
-        // 📌 클라이언트에서 삭제된 이미지가 있다면, 파일 및 DB에서 제거
-        if (deletedImages) {
-            const imagesToDelete = JSON.parse(deletedImages); // 문자열을 배열로 변환
-            updatedImages = updatedImages.filter(image => !imagesToDelete.includes(image));
+        // 📌 삭제 요청된 파일 제거
+        if (deletedAttachments) {
+            const filesToDelete = JSON.parse(deletedAttachments);
+            updatedAttachments = updatedAttachments.filter(file => !filesToDelete.includes(file));
 
-            for (const image of imagesToDelete) {
-                const filePath = path.join(__dirname, '..', 'public', image);
+            for (const file of filesToDelete) {
+                const filePath = path.join(__dirname, '..', 'public', file);
                 try {
-                    await fs.access(filePath); // 파일 존재 여부 확인
-                    await fs.unlink(filePath); // 파일 삭제
+                    await fs.access(filePath);
+                    await fs.unlink(filePath);
                     console.log(`삭제된 파일: ${filePath}`);
                 } catch (err) {
                     console.error(`파일 삭제 실패 (${filePath}):`, err.message);
@@ -77,16 +88,33 @@ router.put("/api/posts/:id", upload.array("images", 5), async (req, res) => {
             }
         }
 
-        // 📌 새로 업로드된 이미지 추가
+        // 📌 업로드 가능한 파일 개수 확인
+        const remainFiles = 5 - updatedAttachments.length;
+        if (req.files.length > remainFiles) {
+            // 초과 파일을 삭제하여 저장되지 않도록 처리
+            for (let i = remainFiles; i < req.files.length; i++) {
+                const filePath = path.join(__dirname, '..', 'public/uploads', req.files[i].filename);
+                try {
+                    await fs.access(filePath);
+                    await fs.unlink(filePath);
+                    console.log(`⚠️ 초과 파일 삭제됨: ${filePath}`);
+                } catch (err) {
+                    console.error(`❌ 초과 파일 삭제 실패 (${filePath}):`, err.message);
+                }
+            }
+            return res.status(400).json({ error: "최대 업로드 파일 수(5개)를 초과했습니다." });
+        }
+
+        // 📌 새 파일 추가
         if (req.files.length > 0) {
-            const newImages = req.files.map(file => `/uploads/${file.filename}`);
-            updatedImages = [...updatedImages, ...newImages];
+            const newAttachments = req.files.map(file => `/uploads/${file.filename}`);
+            updatedAttachments = [...updatedAttachments, ...newAttachments];
         }
 
         // 📌 MongoDB 업데이트
         const updatedPost = await Post.findByIdAndUpdate(
             postId,
-            { title, content, images: updatedImages },
+            { title, content, attachments: updatedAttachments },
             { new: true }
         );
 
@@ -97,7 +125,7 @@ router.put("/api/posts/:id", upload.array("images", 5), async (req, res) => {
     }
 });
 
-// 게시글 삭제 (DELETE /api/posts/:id)
+// 📌 게시글 삭제 (DELETE /api/posts/:id)
 router.delete('/api/posts/:id', async (req, res) => {
     try {
         const deletedPost = await Post.findByIdAndDelete(req.params.id);
@@ -105,28 +133,27 @@ router.delete('/api/posts/:id', async (req, res) => {
             return res.status(404).json({ error: "게시글을 찾을 수 없습니다." });
         }
 
-        // 📌 업로드된 이미지 삭제 (파일과 DB에서 제거)
-        if (deletedPost.images && Array.isArray(deletedPost.images)) {
-            for (const imagePath of deletedPost.images) {
-                const filePath = path.join(__dirname, '..', 'public', imagePath);
-
-                console.log(`📁 삭제 시도 파일 경로: ${filePath}`);
+        // 📌 첨부된 파일 삭제
+        if (deletedPost.attachments && Array.isArray(deletedPost.attachments)) {
+            for (const filePath of deletedPost.attachments) {
+                const fullPath = path.join(__dirname, '..', 'public', filePath);
+                console.log(`📁 삭제 시도 파일 경로: ${fullPath}`);
 
                 try {
-                    await fs.access(filePath); // 파일이 존재하는지 확인
-                    await fs.unlink(filePath); // 파일 삭제
-                    console.log(`✅ 삭제된 파일: ${filePath}`);
+                    await fs.access(fullPath);
+                    await fs.unlink(fullPath);
+                    console.log(`✅ 삭제된 파일: ${fullPath}`);
                 } catch (err) {
                     if (err.code === 'ENOENT') {
-                        console.warn(`⚠️ 파일이 이미 존재하지 않음: ${filePath}`);
+                        console.warn(`⚠️ 파일이 이미 존재하지 않음: ${fullPath}`);
                     } else {
-                        console.error(`❌ 파일 삭제 실패 (${filePath}):`, err.message);
+                        console.error(`❌ 파일 삭제 실패 (${fullPath}):`, err.message);
                     }
                 }
             }
         }
 
-        res.json({ message: "게시글과 관련된 이미지가 삭제되었습니다." });
+        res.json({ message: "게시글과 관련된 첨부 파일이 삭제되었습니다." });
     } catch (err) {
         console.error("게시글 삭제 오류:", err);
         res.status(500).json({ error: "서버 오류 발생" });
