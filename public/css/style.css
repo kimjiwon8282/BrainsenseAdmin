@@ -1,5 +1,12 @@
 /* styles.css 파일 */
 
+<<<<<<< HEAD
+=======
+:root {
+    --bs-font-sans-serif: 'Pretendard', sans-serif;
+}
+
+>>>>>>> origin/daeki_admin_main_page
 /* 페이지 전체 높이를 브라우저 창에 맞추기 */
 html, body {
     height: 100%; /* 브라우저 창 높이에 맞춤 */
@@ -70,5 +77,3 @@ footer {
     align-self: center; /* 버튼을 가로로 중앙 정렬 */
     margin-top: auto; /* 버튼을 카드 하단에 배치 */
 }
-
-
