@@ -1,12 +1,9 @@
 /* styles.css 파일 */
 
-<<<<<<< HEAD
-=======
 :root {
     --bs-font-sans-serif: 'Pretendard', sans-serif;
 }
 
->>>>>>> origin/daeki_admin_main_page
 /* 페이지 전체 높이를 브라우저 창에 맞추기 */
 html, body {
     height: 100%; /* 브라우저 창 높이에 맞춤 */

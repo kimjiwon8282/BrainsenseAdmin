@@ -16,7 +16,6 @@ const {
 } = require('./middlewares/emailAuth');
 const adminAuth = require('./middlewares/adminAuth');
 
-
 const app = express();
 const PORT = 8081;
 
@@ -52,13 +51,6 @@ app.get('/main', (req, res) => {
   res.render('admin_main');
 });
 
-app.get('/admin_crud', (req, res) => {
-  res.render('admin_crud');
-});
-
-app.get('/admin_list', (req, res) => {
-  res.render('admin_list');
-});
 
 app.get('/admin_statistics', (req, res) => {
   res.render('admin_statistics');
@@ -90,3 +82,4 @@ app.use(orderRoutes); // routes/orderRoutes.js의 API 라우트 불러오기
 app.listen(PORT, () => {
   console.log(`서버가 http://localhost:${PORT} 에서 실행 중입니다.`);
 });
+

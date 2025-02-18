@@ -26,8 +26,4 @@ app.get("/",(req,res)=>{
 
 app.listen(port, () => {
     console.log(`main server listening on port ${port}`)
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> origin/daeki_admin_main_page

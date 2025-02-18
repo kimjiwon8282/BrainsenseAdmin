@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-1. 인증 관련 파일
-   ./routes/auth.js : 사용자 로그인 및 JWT 발급
-   ./routes/adminLogin.js : 관리자 로그인 및 JWT 발급
-   ./middlewares/adminAuth.js : JWT 검증 미들웨어 - 관리자 페이지 보호용
-   => auth.js + adminLogin.js 통합
-=======
 # brainsenseWeb
 🚀 회사 홈페이지 개발 프로젝트
 
@@ -79,4 +72,3 @@ HTML, CSS, JavaScript, EJS Template, NODE.JS, MongoDB 등을 활용하여 반응
     "timestamp": "2025-02-10T14:25:36.000Z",
     "status": "처리전"
 }
->>>>>>> origin/daeki_admin_main_page
