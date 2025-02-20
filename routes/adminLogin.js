@@ -1,58 +1,56 @@
-//관리자 로그인 라우트 /login
+require('dotenv').config();
 const express = require('express');
-const bcrypt = require("bcryptjs");
-const Admin = require('../models/admin');
-const jwt = require('jsonwebtoken');
 const router = express.Router();
-const adminAuth = require('../middlewares/adminAuth');
+const bcrypt = require('bcryptjs'); // bcryptjs
+const jwt = require('jsonwebtoken');
+const Admin = require('../models/admin');
 
-const JWT_KEY = process.env.JWT_KEY;
-
-router.post('/', async (req, res) => {
+router.post('/login', async (req, res) => {
   try {
-    let { account, email, password } = req.body;
+    const { account, password } = req.body;
 
-    account = account.trim();
-    email = email.trim().toLowerCase();
-
-    const admin = await Admin.findOne({ account, email });
-
+    // 1) DB에서 해당 계정 조회
+    const admin = await Admin.findOne({ account });
     if (!admin) {
-      return res.status(401).json({ message: '계정을 찾을 수 없습니다.' });
+      return res.status(401).json({ message: '존재하지 않는 계정입니다.' });
     }
 
+    // 2) 비밀번호 비교
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: '비밀번호가 일치하지 않습니다.' });
+    }
+
+    // 3) 승인(approved) 여부 확인
     if (!admin.approved) {
       return res.status(403).json({ message: '관리자 승인이 필요합니다.' });
     }
 
-    const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: '비밀번호가 올바르지 않습니다.' });
-    }
+    // 4) JWT 생성
+    const token = jwt.sign(
+      { adminId: admin._id },
+      process.env.JWT_SECRET, // .env에 JWT_SECRET 설정
+      { expiresIn: '1h' }
+    );
 
-    // JWT 발급
-    const token = jwt.sign({ id: admin._id, email: admin.email }, JWT_KEY, {
-      expiresIn: '1h',
+    // 5) httpOnly 쿠키 설정
+    res.cookie('token', token, {
+      httpOnly: true,    // JS로 쿠키 접근 불가 -> 보안 향상
+      secure: false,     // HTTPS 사용 시 true 권장
+      maxAge: 60 * 60 * 1000 // 1시간
     });
 
-    res.status(200).json({ message: '로그인 성공!', token });
-  } catch (error) {
-    console.error(`로그인 오류: ${error.message}`);
-    res.status(500).json({ message: '서버 오류 발생', error: error.message });
+    // 6) 성공 응답
+    return res.json({ message: '로그인 성공' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: '서버 오류' });
   }
 });
 
-// ✅ 보호된 프로필 조회
-router.get('/profile', adminAuth, async (req, res) => {
-  try {
-    const admin = await Admin.findById(req.admin.id).select('-password');
-    if (!admin) {
-      return res.status(404).json({ message: '관리자를 찾을 수 없습니다.' });
-    }
-    res.json(admin);
-  } catch (error) {
-    res.status(500).json({ message: '서버 오류 발생', error });
-  }
-});
+// GET 라우트: 로그인 페이지 렌더링
+router.get('/login', (req, res) => {
+    res.render('admin_login');
+  });
 
 module.exports = router;

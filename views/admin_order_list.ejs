@@ -22,8 +22,17 @@
             <img src="/images/logo.svg" alt="브레인센스_로고">
         </a>
         <div class="d-flex justify-content-end align-items-center gap-2">
-            <button class="btn btn-danger d-none d-lg-block" onclick="location.href='/logout'">
+            <button class="btn btn-primary d-none d-lg-block" onclick="location.href='https://www.naver.com'">
+                회사 홈페이지로 이동
+            </button>
+            <button class="btn btn-primary d-lg-none" onclick="location.href='https://www.naver.com'">
+                <i class="bi bi-house text-white"></i>
+            </button>
+            <button class="btn btn-danger d-none d-lg-block" onclick="location.href='/admin/logout'">
                 로그아웃
+            </button>
+            <button class="btn btn-danger d-lg-none" onclick="location.href='/admin/logout'">
+                <i class="bi bi-box-arrow-right text-white"></i>
             </button>
         </div>
     </nav>
@@ -36,8 +45,9 @@
                     <th>순번</th>
                     <th>회사명</th>
                     <th>유형</th>
+                    <th>생성일자</th> 
                     <th>상태</th>
-                    <th>관리</th>
+                    <th>상세정보</th>
                 </tr>
             </thead>
             <tbody>
@@ -46,6 +56,8 @@
                     <td><%= index + 1 %></td>
                     <td><%= order.companyName %></td>
                     <td><%= order.orderType %></td>
+                    <!-- toLocaleString() 등을 이용해 날짜/시간을 보기 좋게 표시 -->
+                    <td><%= order.timestamp.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) %></td>
                     <td>
                         <select class="form-select" id="status-<%= order._id %>" onchange="updateStatus('<%= order._id %>')">
                             <option value="처리전" <%= order.status === '처리전' ? 'selected' : '' %>>처리전</option>

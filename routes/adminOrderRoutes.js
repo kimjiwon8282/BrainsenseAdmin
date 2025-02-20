@@ -6,7 +6,7 @@ const router = express.Router();
 // **GET 요청: 모든 주문 조회** 📌8081포트에서 필요
 router.get('/api/orders', async (req, res) => {
     try {
-        const orders = await Order.find(); // MongoDB에서 모든 주문 조회
+        const orders = await Order.find().sort({ timestamp: -1 });
 
         res.render('admin_order_list',{orders:orders});
     } catch (error) {
