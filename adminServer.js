@@ -7,17 +7,20 @@ const dbConnect = require('./config/dbConnect'); // 데이터베이스 연결 �
 
 // 라우트 불러오기
 const orderRoutes = require('./routes/adminOrderRoutes'); // 주문 관련 라우트
-const postRoutes = require('./routes/postRoutes');        // 게시글 관련 라우트
-const adminRegister = require('./routes/adminRegister');  // 회원가입 라우트
-const adminApprove = require('./routes/adminApprove');    // 관리자 승인 라우트
-const adminSendmail = require('./routes/adminSendmail');  // 메일 발송 라우트
-const adminLogin = require('./routes/adminLogin');        // 로그인 라우트
+const postRoutes = require('./routes/postRoutes'); // 게시글 관련 라우트
+const adminRegister = require('./routes/adminRegister'); // 회원가입 라우트
+const adminApprove = require('./routes/adminApprove'); // 관리자 승인 라우트
+const adminSendmail = require('./routes/adminSendmail'); // 메일 발송 라우트
+const adminLogin = require('./routes/adminLogin'); // 로그인 라우트
 
 // 미들웨어 불러오기 (로그인 필요)
 const loginAuthMiddleware = require('./middlewares/loginAuth');
 
 // 이메일 인증 미들웨어
-const { sendVerification, verifyEmailCode } = require('./middlewares/emailAuth');
+const {
+  sendVerification,
+  verifyEmailCode,
+} = require('./middlewares/emailAuth');
 
 const app = express();
 const PORT = 8081;
@@ -58,11 +61,15 @@ app.use('/admin/sendMail', adminSendmail);
 
 // 회원가입 폼 페이지
 app.get('/register', (req, res) => {
-  res.render('admin_register');
+  const verifiedEmail = req.cookies.verifiedEmail;
+  if (!verifiedEmail) {
+    return res.redirect('/verify-email');
+  }
+  res.render('admin_register', { email: verifiedEmail });
 });
 
 // 이메일 인증 페이지
-app.get('/verify-email', (req, res) => {
+app.get('/verify-email', loginAuthMiddleware, (req, res) => {
   res.render('admin_verifyemail');
 });
 
@@ -74,7 +81,6 @@ app.post('/signup/email/verify', verifyEmailCode);
    [인증이 필요한(Private) 라우트]
    아래 라우트들은 로그인 후에만 접근 가능함
 ========================= */
-
 
 // loginAuthMiddleware를 전역 미들웨어로 적용 (이 아래의 라우트들은 모두 인증 필요)
 app.use(loginAuthMiddleware);
@@ -102,7 +108,7 @@ app.use(orderRoutes);
 //로그아웃
 app.get('/admin/logout', loginAuthMiddleware, (req, res) => {
   res.clearCookie('token', { httpOnly: true, secure: false });
-  console.log("토큰 삭제됨. - 로그아웃 완료")
+  console.log('토큰 삭제됨. - 로그아웃 완료');
   res.redirect('/admin/login');
 });
 
