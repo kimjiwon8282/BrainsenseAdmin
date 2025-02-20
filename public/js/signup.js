@@ -53,8 +53,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const email = emailInput.value.trim();
       const code = codeInput.value.trim();
 
-      console.log(`인증 코드 확인 요청: email=${email}, code=${code}`);
-
       const response = await fetch('/admin/email/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -89,7 +89,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             const mailResult = await mailResponse.json();
-            console.log(`관리자 승인 요청 결과:`, mailResult);
 
             if (mailResponse.ok) {
               alert('관리자에게 승인 요청이 전송되었습니다.');
