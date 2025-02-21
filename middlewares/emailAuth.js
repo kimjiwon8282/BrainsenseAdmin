@@ -35,49 +35,32 @@ const sendVerification = async (req, res) => {
 //이메일 인증코드 검증
 const verifyEmailCode = async (req, res) => {
   try {
-    console.log(`🔍 [SERVER] 요청된 데이터:`, req.body);
-
     const { email, code } = req.body;
 
     if (!email || !code) {
-      console.error(`❌ [SERVER] 이메일 또는 코드가 누락됨`);
       return res
         .status(400)
         .json({ message: '이메일과 인증 코드를 입력하세요' });
     }
 
-    console.log(
-      `🔍 [SERVER] 인증 코드 검증 요청: email=${email}, 입력 코드=${code}`
-    );
-
     const storedCode = verificationCodes.get(email);
 
-    console.log(
-      `🧐 [SERVER] 저장된 인증 코드: ${storedCode} (type: ${typeof storedCode})`
-    );
-
     if (!storedCode) {
-      console.error(`❌ [SERVER] 인증 코드 없음: ${email}`);
       return res
         .status(400)
         .json({ message: '인증 코드가 만료되었거나 요청되지 않았습니다.' });
     }
 
     if (storedCode != code) {
-      console.error(
-        `❌ [SERVER] 인증 코드 불일치! 저장된 코드: ${storedCode}, 입력된 코드: ${code}`
-      );
       return res
         .status(400)
         .json({ message: '인증 코드가 올바르지 않습니다.' });
     }
 
     verificationCodes.delete(email);
-    console.log(`✅ [SERVER] 인증 성공: ${email}`);
 
     res.status(200).json({ message: '이메일 인증이 완료되었습니다.' });
   } catch (error) {
-    console.error(`❌ [SERVER] 인증 처리 오류: ${error.message}`);
     res.status(500).json({ message: '서버 오류 발생', error: error.message });
   }
 };

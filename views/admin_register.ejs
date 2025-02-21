@@ -50,14 +50,16 @@
         <div class="col-md-6 p-5 d-flex flex-column justify-content-center">
           <h3 class="mb-4 text-center">관리자 회원가입</h3>
 
-          <!-- 이메일 인증 폼 (처음에는 보이게 설정) -->
+          <!-- 이메일 인증 폼 -->
           <div id="emailVerification">
             <form id="emailForm">
               <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
+                <label for="emailVerificationEmail" class="form-label"
+                  >Email</label
+                >
                 <input
                   type="email"
-                  id="email"
+                  id="emailVerificationEmail"
                   class="form-control"
                   placeholder="Enter your email"
                   required
@@ -84,10 +86,9 @@
             </div>
           </div>
 
-          <!-- 회원가입 폼 (처음에는 숨기기) -->
+          <!-- 회원가입 폼 -->
           <div id="registrationForm" style="display: none">
             <form id="signupForm">
-              <!-- Account ID -->
               <div class="mb-3">
                 <label for="account" class="form-label">Account ID</label>
                 <input
@@ -96,11 +97,8 @@
                   class="form-control"
                   placeholder="Enter your account ID"
                   required
-                  disabled
                 />
               </div>
-
-              <!-- Username -->
               <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
                 <input
@@ -109,23 +107,18 @@
                   class="form-control"
                   placeholder="Enter your name"
                   required
-                  disabled
                 />
               </div>
-
-              <!-- Email (이미 인증된 이메일 사용) -->
               <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
+                <label for="registrationEmail" class="form-label">Email</label>
                 <input
                   type="email"
-                  id="email"
+                  id="registrationEmail"
                   class="form-control"
                   placeholder="Enter your email"
                   disabled
                 />
               </div>
-
-              <!-- Password -->
               <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <input
@@ -134,11 +127,8 @@
                   class="form-control"
                   placeholder="Enter your password"
                   required
-                  disabled
                 />
               </div>
-
-              <!-- Phone Number -->
               <div class="mb-3">
                 <label for="phoneNumber" class="form-label">Phone Number</label>
                 <input
@@ -147,21 +137,12 @@
                   class="form-control"
                   placeholder="010-1234-5678"
                   required
-                  disabled
                 />
               </div>
-
-              <!-- Signup Button -->
               <button type="submit" class="btn btn-primary w-100 mb-3">
                 회원가입
               </button>
             </form>
-          </div>
-
-          <div class="text-center">
-            <a href="/admin/login" class="text-decoration-none"
-              >Already have an account? Sign In</a
-            >
           </div>
         </div>
       </div>
