@@ -26,7 +26,7 @@ router.get('/approve', async (req, res) => {
       subject: '관리자 계정 승인 완료',
       html: `<p>안녕하세요, ${updatedAdmin.username}님.<p>
       <p>귀하의 관리자 계정이 승인되었습니다. 이제 로그인 할 수 있습니다.<p>
-      <a href="http://localhost:8081/login">로그인하러 가기</a>`,
+      <a href="http://localhost:8081/admin/login">로그인하러 가기</a>`,
     };
 
     await smtpTransport.sendMail(mailOptions);
