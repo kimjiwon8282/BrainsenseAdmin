@@ -61,16 +61,7 @@ app.use('/admin/sendMail', adminSendmail);
 
 // 회원가입 폼 페이지
 app.get('/register', (req, res) => {
-  const verifiedEmail = req.cookies.verifiedEmail;
-  if (!verifiedEmail) {
-    return res.redirect('/verify-email');
-  }
-  res.render('admin_register', { email: verifiedEmail });
-});
-
-// 이메일 인증 페이지
-app.get('/verify-email', loginAuthMiddleware, (req, res) => {
-  res.render('admin_verifyemail');
+  res.render('admin_register');
 });
 
 // 이메일 인증 API

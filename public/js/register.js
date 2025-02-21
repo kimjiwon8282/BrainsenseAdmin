@@ -1,11 +1,13 @@
 //회원가입 관련
 document.addEventListener('DOMContentLoaded', function () {
-  //이메일 인증 여부 확인
-  const email = localStorage.getItem('verifiedEmail');
+  // 이메일 인증 여부 확인
+  const email = localStorage.getItem('verifiedEmail'); // localStorage에서 인증된 이메일 확인
 
+  // 인증된 이메일이 없다면 /verify-email로 리디렉션
   if (!email) {
-    window.location.href = '/verify-email'; //Redirect
+    window.location.href = '/verify-email'; // 인증되지 않은 이메일이라면 /verify-email로 리디렉션
   }
+
   const emailForm = document.getElementById('emailForm');
   const verifyForm = document.getElementById('verifyForm');
 
@@ -30,7 +32,8 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
-  //인증 코드 검증
+
+  // 인증 코드 검증
   if (verifyForm) {
     verifyForm.addEventListener('submit', async function (event) {
       event.preventDefault();
@@ -48,14 +51,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (response.ok) {
         alert('이메일 인증 완료');
-        document.cookie = `verifiedEmail=${email}; path=/'`;
-        window.location.href = '/register';
+        localStorage.setItem('verifiedEmail', email); // 인증된 이메일을 localStorage에 저장
+        window.location.href = '/register'; // 인증 후 /register 페이지로 리디렉션
       } else {
         alert(result.message || '인증 코드가 올바르지 않습니다.');
       }
     });
   }
 });
+
 document.addEventListener('DOMContentLoaded', function () {
   const signupForm = document.getElementById('signupForm');
 
