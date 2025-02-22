@@ -15,25 +15,13 @@
 </head>
 <body>
     <nav class="navbar navbar-light bg-light px-3">
-        <a class="navbar-brand d-lg-none" href="/">
-            <img src="/images/logo.svg" alt="브레인센스_로고">
-        </a>
-        <a class="navbar-brand d-none d-lg-block" href="/main">
-            <img src="/images/logo.svg" alt="브레인센스_로고">
-        </a>
+        <a class="navbar-brand d-lg-none" href="/"><img src="/images/logo.svg" alt="브레인센스_로고"></a>
+        <a class="navbar-brand d-none d-lg-block" href="/main"><img src="/images/logo.svg" alt="브레인센스_로고"></a>
         <div class="d-flex justify-content-end align-items-center gap-2">
-            <button class="btn btn-primary d-none d-lg-block" onclick="location.href='https://www.naver.com'">
-                회사 홈페이지로 이동
-            </button>
-            <button class="btn btn-primary d-lg-none" onclick="location.href='https://www.naver.com'">
-                <i class="bi bi-house text-white"></i>
-            </button>
-            <button class="btn btn-danger d-none d-lg-block" onclick="location.href='/admin/logout'">
-                로그아웃
-            </button>
-            <button class="btn btn-danger d-lg-none" onclick="location.href='/admin/logout'">
-                <i class="bi bi-box-arrow-right text-white"></i>
-            </button>
+            <button class="btn btn-primary d-none d-lg-block" onclick="location.href='https://www.naver.com'">회사 홈페이지로 이동</button>
+            <button class="btn btn-primary d-lg-none" onclick="location.href='https://www.naver.com'"><i class="bi bi-house text-white"></i></button>
+            <button class="btn btn-danger d-none d-lg-block" onclick="location.href='/admin/logout'">로그아웃</button>
+            <button class="btn btn-danger d-lg-none" onclick="location.href='/admin/logout'"><i class="bi bi-box-arrow-right text-white"></i></button>
         </div>
     </nav>
     
@@ -56,7 +44,6 @@
                     <td><%= index + 1 %></td>
                     <td><%= order.companyName %></td>
                     <td><%= order.orderType %></td>
-                    <!-- toLocaleString() 등을 이용해 날짜/시간을 보기 좋게 표시 -->
                     <td><%= order.timestamp.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }) %></td>
                     <td>
                         <select class="form-select" id="status-<%= order._id %>" onchange="updateStatus('<%= order._id %>')">
@@ -67,12 +54,14 @@
                     <td>
                         <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#orderDetailsModal"
                             data-id="<%= order._id %>"
+                            data-customer-name="<%= order.customerName %>"
                             data-company-name="<%= order.companyName %>"
                             data-order-type="<%= order.orderType %>"
                             data-details="<%= order.details %>"
                             data-status="<%= order.status %>"
                             data-email="<%= order.companyEmail %>"
-                            data-phone="<%= order.companyPhone %>">
+                            data-phone="<%= order.companyPhone %>"
+                            data-attachments='<%= JSON.stringify(order.attachments || []) %>'>
                             보기
                         </button>
                     </td>
@@ -91,12 +80,15 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <p><strong>고객명:</strong> <span id="modalCustomerName"></span></p>
                     <p><strong>회사명:</strong> <span id="modalCompanyName"></span></p>
-                    <p><strong>유형:</strong> <span id="modalOrderType"></span></p>
-                    <p><strong>세부 사항:</strong> <span id="modalDetails"></span></p>
                     <p><strong>회사 이메일:</strong> <span id="modalCompanyEmail"></span></p>
                     <p><strong>회사 전화번호:</strong> <span id="modalCompanyPhone"></span></p>
+                    <p><strong>유형:</strong> <span id="modalOrderType"></span></p>
+                    <p><strong>세부 사항:</strong> <span id="modalDetails"></span></p>
                     <p><strong>상태:</strong> <span id="modalStatus"></span></p>
+                    <p><strong>첨부파일:</strong></p>
+                    <div id="modalAttachments"></div>
                 </div>
             </div>
         </div>
