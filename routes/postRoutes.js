@@ -6,6 +6,10 @@ const fs = require('fs').promises;
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
+
+// 📌 클라이언트 프로젝트 폴더 경로
+const CLIENT_UPLOAD_PATH = "C:/Users/iwill/brainsense_client/public/uploads";
+
 // 📌 Multer 설정 (파일을 'uploads/' 폴더에 저장)
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -23,6 +27,28 @@ const upload = multer({
     storage: storage, 
     limits: { fileSize: 5 * 1024 * 1024 },
 });
+
+// 📌 파일을 클라이언트 폴더에도 복사하는 함수
+async function copyToClientFolder(files) {
+    try {
+        await fs.access(CLIENT_UPLOAD_PATH);
+    } catch {
+        await fs.mkdir(CLIENT_UPLOAD_PATH, { recursive: true });
+    }
+
+    for (const file of files) {
+        const sourcePath = path.join("public/uploads", file.filename);
+        const destPath = path.join(CLIENT_UPLOAD_PATH, file.filename);
+
+        try {
+            await fs.copyFile(sourcePath, destPath);
+            console.log(`✅ 파일 복사 완료: ${destPath}`);
+        } catch (err) {
+            console.error(`❌ 파일 복사 실패: ${destPath}`, err);
+        }
+    }
+}
+
 
 // 📌 게시글 조회 (GET /api/posts)
 router.get('/api/posts', async (req, res) => {
@@ -48,6 +74,9 @@ router.post('/api/posts', upload.array('attachments', 5), async (req, res) => {
 
         const fileUrls = req.files.map(file => `/uploads/${file.filename}`); // 파일 URL 생성
 
+        // 📌 클라이언트 폴더에도 복사 실행
+        await copyToClientFolder(files);
+
         const newPost = new Post({ title, content, attachments: fileUrls });
         await newPost.save();
 
@@ -57,6 +86,24 @@ router.post('/api/posts', upload.array('attachments', 5), async (req, res) => {
         res.status(500).json({ error: "서버 오류 발생" });
     }
 });
+
+// 📌 클라이언트 프로젝트에서도 파일 삭제
+async function deleteFromClientFolder(filePaths) {
+    for (const file of filePaths) {
+        const clientFilePath = path.join(CLIENT_UPLOAD_PATH, path.basename(file));
+        try {
+            await fs.access(clientFilePath);
+            await fs.unlink(clientFilePath);
+            console.log(`✅ 클라이언트 파일 삭제 완료: ${clientFilePath}`);
+        } catch (err) {
+            if (err.code === 'ENOENT') {
+                console.warn(`⚠️ 클라이언트 폴더에 파일 없음: ${clientFilePath}`);
+            } else {
+                console.error(`❌ 클라이언트 파일 삭제 실패: ${clientFilePath}`, err.message);
+            }
+        }
+    }
+}
 
 // 📌 게시글 수정 API (PUT /api/posts/:id)
 router.put("/api/posts/:id", upload.array("attachments", 5), async (req, res) => {
@@ -71,7 +118,7 @@ router.put("/api/posts/:id", upload.array("attachments", 5), async (req, res) =>
 
         let updatedAttachments = existingPost.attachments || [];
 
-        // 📌 삭제 요청된 파일 제거
+        // 📌 삭제 요청된 파일 제거 (서버 & 클라이언트)
         if (deletedAttachments) {
             const filesToDelete = JSON.parse(deletedAttachments);
             updatedAttachments = updatedAttachments.filter(file => !filesToDelete.includes(file));
@@ -81,11 +128,14 @@ router.put("/api/posts/:id", upload.array("attachments", 5), async (req, res) =>
                 try {
                     await fs.access(filePath);
                     await fs.unlink(filePath);
-                    console.log(`삭제된 파일: ${filePath}`);
+                    console.log(`✅ 서버에서 삭제된 파일: ${filePath}`);
                 } catch (err) {
-                    console.error(`파일 삭제 실패 (${filePath}):`, err.message);
+                    console.error(`❌ 서버 파일 삭제 실패: ${filePath}`, err.message);
                 }
             }
+
+            // 📌 클라이언트 폴더에서도 삭제 실행
+            await deleteFromClientFolder(filesToDelete);
         }
 
         // 📌 업로드 가능한 파일 개수 확인
@@ -151,6 +201,7 @@ router.delete('/api/posts/:id', async (req, res) => {
                     }
                 }
             }
+            await deleteFromClientFolder(deletedPost.attachments);
         }
 
         res.json({ message: "게시글과 관련된 첨부 파일이 삭제되었습니다." });
