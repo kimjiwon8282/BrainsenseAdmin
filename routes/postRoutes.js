@@ -159,6 +159,8 @@ router.put("/api/posts/:id", upload.array("attachments", 5), async (req, res) =>
         if (req.files.length > 0) {
             const newAttachments = req.files.map(file => `/uploads/${file.filename}`);
             updatedAttachments = [...updatedAttachments, ...newAttachments];
+            // 📌 클라이언트 폴더에도 복사
+            await copyToClientFolder(req.files);
         }
 
         // 📌 MongoDB 업데이트
