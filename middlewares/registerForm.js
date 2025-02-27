@@ -9,15 +9,15 @@ const validateSignup = async (req, res, next) => {
   }
 
   //아이디 형식 확인 - 숫자 문자 포함 6-12자리
-  const usernameRegex = /^[a-zA-z0-9]{6,12}$/;
-  if (!usernameRegex.test(username)) {
+  const accountRex = /^[a-zA-Z0-9]{6,12}$/;
+  if (!accountRex.test(account)) {
     return res.status(400).json({
       message:
         '아이디는 문자와 숫자를 포함한 6자리 이상 12자리 이하로 입력해주세요',
     });
   }
   //아이디 중복 확인
-  const existingUser = await user.findOne({ username });
+  const existingUser = await user.findOne({ account });
   if (existingUser) {
     return res.status(403).json({ message: '이미 사용중인 아이디입니다.' });
   }
@@ -31,16 +31,16 @@ const validateSignup = async (req, res, next) => {
         '비밀번호는 문자, 숫자, 특수문자를 포함한 8자리 이상 18자리 이하로 입력해주세요',
     });
   }
-  //핸드폰 번호 하이픈 제한
+  //핸드폰 번호 확인
   const phoneRegex = /^010-\d{4}-\d{4}$/;
   if (!phoneRegex.test(phoneNumber)) {
     return res.status(400).json({
-      message: '올바른 핸드폰 번호 형식이 아닙니다. (예: 010-1234-5678)',
+      message: '올바른 휴대폰을 입력하세요',
     });
   }
 
   //핸드폰 번호 중복 확인
-  const existingPhone = await Admin.findOne({ phoneNumber });
+  const existingPhone = await user.findOne({ phoneNumber });
   if (existingPhone) {
     return res.status(403).json({ message: '이미 등록된 핸드폰 번호입니다.' });
   }

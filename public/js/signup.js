@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const verifyForm = document.getElementById('verifyForm');
   const registrationForm = document.getElementById('registrationForm');
   const signupForm = document.getElementById('signupForm');
+  const phoneInput = document.getElementById('phoneNumber');
 
   // 이메일 인증 요청
   if (emailForm) {
@@ -78,6 +79,23 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  if (phoneInput) {
+    phoneInput.addEventListener('input', function (e) {
+      let phoneNumber = e.target.value.replace(/\D/g, '');
+      if (phoneNumber.length <= 3) {
+        phoneNumber = phoneNumber.replace(/(\d{3})(\d{0,4})/, '$1-$2'); // 3자리 후에 하이픈
+      } else if (phoneNumber.length <= 7) {
+        phoneNumber = phoneNumber.replace(
+          /(\d{3})(\d{3})(\d{0,4})/,
+          '$1-$2-$3'
+        ); // 7자리 후에 하이픈
+      } else {
+        phoneNumber = phoneNumber.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3'); // 10자리 후에 하이픈
+      }
+      e.target.value = phoneNumber;
+    });
+  }
+
   // 회원가입 요청
   if (signupForm) {
     signupForm.addEventListener('submit', async function (event) {
@@ -89,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const registrationEmail =
         document.getElementById('registrationEmail').value;
       const password = document.getElementById('password').value;
-      const phoneNumber = document.getElementById('phoneNumber').value;
+      const phoneNumber = phoneInput.value;
 
       const response = await fetch('/signup/admin', {
         method: 'POST',
