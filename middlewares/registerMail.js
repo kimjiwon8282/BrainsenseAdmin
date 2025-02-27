@@ -1,6 +1,6 @@
 //회원가입 이메일 전송 미들웨어
 const Admin = require('../models/admin');
-const bcrypt = require("bcryptjs");
+const bcrypt = require('bcryptjs');
 const smtpTransport = require('../config/mailer');
 
 const registerAdmin = async (req, res) => {
