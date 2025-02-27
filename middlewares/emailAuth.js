@@ -7,10 +7,12 @@ const verificationCodes = new Map();
 const sendVerification = async (req, res) => {
   try {
     const { email } = req.body;
+
     const admin = await Admin.findOne({ email });
     if (admin) {
       return res.status(400).json({ message: '이미 인증된 메일입니다.' });
     }
+
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     console.log(`생성된 인증 코드: ${code}`);
