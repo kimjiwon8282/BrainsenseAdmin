@@ -1,11 +1,16 @@
 //이메일 인증 미들웨어 - 이메일 인증 코드 사용
 const smtpTransport = require('../config/mailer');
+const Admin = require('../models/admin');
 
 const verificationCodes = new Map();
 
 const sendVerification = async (req, res) => {
   try {
     const { email } = req.body;
+    const admin = await Admin.findOne({ email });
+    if (admin) {
+      return res.status(400).json({ message: '이미 인증된 메일입니다.' });
+    }
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     console.log(`생성된 인증 코드: ${code}`);
@@ -56,7 +61,11 @@ const verifyEmailCode = async (req, res) => {
         .status(400)
         .json({ message: '인증 코드가 올바르지 않습니다.' });
     }
-
+    const admin = await Admin.findOne({ email });
+    if (admin) {
+      admin.isEmailVerified = true;
+      await admin.save();
+    }
     verificationCodes.delete(email);
 
     res.status(200).json({ message: '이메일 인증이 완료되었습니다.' });

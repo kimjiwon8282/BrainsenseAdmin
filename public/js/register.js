@@ -1,13 +1,5 @@
 //회원가입 관련
 document.addEventListener('DOMContentLoaded', function () {
-  // 이메일 인증 여부 확인
-  const email = localStorage.getItem('verifiedEmail'); // localStorage에서 인증된 이메일 확인
-
-  // 인증된 이메일이 없다면 /verify-email로 리디렉션
-  if (!email) {
-    window.location.href = '/verify-email'; // 인증되지 않은 이메일이라면 /verify-email로 리디렉션
-  }
-
   const emailForm = document.getElementById('emailForm');
   const verifyForm = document.getElementById('verifyForm');
 
@@ -17,18 +9,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const email = document.getElementById('email').value;
 
-      const response = await fetch('/signup/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
+      try {
+        const response = await fetch('/signup/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
 
-      if (response.ok) {
-        document.getElementById('emailMessage').style.display = 'block';
-        if (verifyForm) verifyForm.style.display = 'block';
-        document.getElementById('email').disabled = true;
-      } else {
-        alert('이메일 전송 실패');
+        const result = await response.json();
+
+        if (response.ok) {
+          document.getElementById('emailMessage').style.display = 'block';
+          if (verifyForm) verifyForm.style.display = 'block';
+          document.getElementById('email').disabled = true;
+        } else {
+          // 이미 인증된 이메일일 경우 처리
+          if (result.message === '이미 인증된 이메일입니다.') {
+            alert('이미 인증된 이메일입니다.');
+            window.location.href = '/main'; // /main으로 리디렉션
+          } else {
+            // 그 외 이메일 전송 실패 메시지 처리
+            alert(result.message || '이메일 전송 실패');
+          }
+        }
+      } catch (error) {
+        alert('이메일 전송 중 오류가 발생했습니다. 서버 상태를 확인해 주세요.');
       }
     });
   }

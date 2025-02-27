@@ -13,18 +13,32 @@ document.addEventListener('DOMContentLoaded', function () {
     emailForm.addEventListener('submit', async function (event) {
       event.preventDefault();
       const email = emailVerificationEmail.value;
-      const response = await fetch('/signup/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
 
-      if (response.ok) {
-        if (emailMessage) emailMessage.style.display = 'block';
-        if (verifyForm) verifyForm.style.display = 'block';
-        emailVerificationEmail.disabled = true;
-      } else {
-        alert('이메일 전송 실패');
+      try {
+        const response = await fetch('/signup/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          if (emailMessage) emailMessage.style.display = 'block';
+          if (verifyForm) verifyForm.style.display = 'block';
+          emailVerificationEmail.disabled = true;
+        } else {
+          // 이미 인증된 이메일일 경우 처리
+          if (result.message === '이미 인증된 이메일입니다.') {
+            alert('이미 인증된 이메일입니다.');
+            window.location.href = '/main'; // /main으로 리디렉션
+          } else {
+            // 그 외 이메일 전송 실패 메시지 처리
+            alert(result.message || '이메일 전송 실패');
+          }
+        }
+      } catch (error) {
+        alert('이메일 전송 중 오류가 발생했습니다. 서버 상태를 확인해 주세요.');
       }
     });
   }
