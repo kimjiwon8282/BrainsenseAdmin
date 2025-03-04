@@ -72,6 +72,7 @@
                         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal"
                             data-id="<%= post._id %>"
                             data-title="<%= post.title %>"
+                            data-source="<%= post.source %>"
                             data-content="<%= post.content %>"
                             data-attachments='<%= JSON.stringify(post.attachments || []) %>'
                             data-created-at="<%= post.createdAt %>"
@@ -174,6 +175,10 @@
                         <div class="mb-3">
                             <label for="postTitle" class="form-label">제목</label>
                             <input type="text" class="form-control" id="postTitle" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="postSource" class="form-label">출처</label>
+                            <input type="text" class="form-control" id="postSource" name="source" required>
                         </div>
 
                         <div class="mb-3">

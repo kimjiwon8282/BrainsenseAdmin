@@ -70,9 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();
             document.getElementById("newPostContent").value = quill.root.innerHTML;
             var formData = new FormData(newPostForm);
-            //수동으로 source 값 추가
-            formData.append("source", document.getElementById("newPostSource").value);
-
+            var sourceValue = document.getElementById("newPostSource").value.trim();
             $.ajax({
                 url: "/api/posts",
                 method: "POST",
@@ -101,6 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (button) {
                 let postId = button.getAttribute("data-id");
                 let postTitle = button.getAttribute("data-title");
+                let postSource = button.getAttribute("data-source");
                 let postContent = button.getAttribute("data-content");
                 let attachments = JSON.parse(button.getAttribute("data-attachments") || "[]");
 
@@ -108,6 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 document.getElementById("postId").value = postId;
                 document.getElementById("postTitle").value = postTitle;
+                document.getElementById("postSource").value = postSource;
                 editQuill.root.innerHTML = "";
                 editQuill.clipboard.dangerouslyPasteHTML(postContent);
 
@@ -202,6 +202,7 @@ document.addEventListener("DOMContentLoaded", function () {
             let button = event.target.closest("[data-bs-target='#viewPostModal']");
             if (button) {
                 let postTitle = button.getAttribute("data-title");
+                let postSource = button.getAttribute("data-source");
                 let postContent = button.getAttribute("data-content");
                 let attachments = JSON.parse(button.getAttribute("data-attachments") || "[]");
 
@@ -209,6 +210,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 let updatedAt = button.getAttribute("data-updated-at");
 
                 document.getElementById("viewPostTitle").textContent = postTitle;
+                document.getElementById("viewPostSource").textContent = postSource;
                 // document.getElementById("viewPostContent").innerHTML = postContent;
                 // 📌 Quill 스타일 적용 (기존 내용에 ql-editor 클래스를 추가)
                 document.getElementById("viewPostContent").innerHTML = `<div class="ql-editor">${postContent}</div>`;
