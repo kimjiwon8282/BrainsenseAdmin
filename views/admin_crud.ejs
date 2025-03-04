@@ -59,15 +59,21 @@
                 <tr>
                     <td><%= index + 1 %></td>
                     <td>
-                        <a href="#" class="text-decoration-none" data-bs-toggle="modal" data-bs-target="#viewPostModal"
-                            data-title="<%= post.title %>"
-                            data-content="<%= post.content %>"
-                            data-attachments='<%= JSON.stringify(post.attachments || []) %>'
-                            data-created-at="<%= post.createdAt %>"
-                            data-updated-at="<%= post.updatedAt %>">
+                        <a href="#" 
+                           class="text-decoration-none post-link" 
+                           data-bs-toggle="modal" 
+                           data-bs-target="#viewPostModal"
+                           data-title="<%= post.title %>"
+                           data-source="<%= post.source %>"
+                           data-content='<%= post.content.replace(/"/g, "&quot;") %>'
+                           data-attachments='<%- JSON.stringify(post.attachments || []) %>'
+                           data-created-at="<%= post.createdAt %>"
+                           data-updated-at="<%= post.updatedAt %>">
                             <%= post.title %>
                         </a>
                     </td>
+                    
+                    
                     <td>
                         <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal"
                             data-id="<%= post._id %>"
@@ -111,7 +117,7 @@
                     <small id="viewPostTime" class="text-muted text-end me-3 mt-2"></small> <!-- 작성/수정 시간 오른쪽 정렬 -->
                 </div>
                 <div class="modal-body">
-                    <p id="viewPostContent" class="content-text"></p>
+                    <p id="viewPostContent" class="content-text">여기에 내용이 표시됩니다.</p>
                     <!-- 📌 첨부 파일 목록 (파일 다운로드 링크) -->
                     <div id="viewPostAttachments" class="mt-3"></div>
                 </div>
