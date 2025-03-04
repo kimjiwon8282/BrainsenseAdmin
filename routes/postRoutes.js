@@ -62,9 +62,8 @@ router.get('/api/posts', async (req, res) => {
 // 📌 새 게시글 추가 (파일 업로드 포함)
 router.post('/api/posts', upload.array('attachments', 5), async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, source } = req.body;
     const files = req.files || [];
-
     // 📌 업로드 개수 확인
     if (files.length > 5) {
       return res
@@ -77,7 +76,7 @@ router.post('/api/posts', upload.array('attachments', 5), async (req, res) => {
     // 📌 클라이언트 폴더에도 복사 실행
     await copyToClientFolder(files);
 
-    const newPost = new Post({ title, content, attachments: fileUrls });
+    const newPost = new Post({ title, source, content, attachments: fileUrls });
     await newPost.save();
 
     res.status(201).json(newPost);

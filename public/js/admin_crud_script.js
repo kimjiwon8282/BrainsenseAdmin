@@ -70,6 +70,8 @@ document.addEventListener("DOMContentLoaded", function () {
             event.preventDefault();
             document.getElementById("newPostContent").value = quill.root.innerHTML;
             var formData = new FormData(newPostForm);
+            //수동으로 source 값 추가
+            formData.append("source", document.getElementById("newPostSource").value);
 
             $.ajax({
                 url: "/api/posts",
