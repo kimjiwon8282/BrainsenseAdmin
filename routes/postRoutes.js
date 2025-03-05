@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 
 // 📌 클라이언트 프로젝트 폴더 경로
 const CLIENT_UPLOAD_PATH =
-  ' ~/Desktop/brainsenseWeb-client_daeun/public/uploads/';
+  '/Users/jeongda-eun/Desktop/brainsenseWeb-client_daeun/public/uploads';
 
 // 📌 Multer 설정 (파일을 'uploads/' 폴더에 저장)
 const storage = multer.diskStorage({
@@ -30,23 +30,25 @@ const upload = multer({
 // 📌 파일을 클라이언트 폴더에도 복사하는 함수
 async function copyToClientFolder(files) {
   try {
-    await fs.access(CLIENT_UPLOAD_PATH);
-  } catch {
-    await fs.mkdir(CLIENT_UPLOAD_PATH, { recursive: true });
+      await fs.access(CLIENT_UPLOAD_PATH);
+  } catch (err) {
+      console.warn(`📂 클라이언트 폴더가 없어서 생성 중: ${CLIENT_UPLOAD_PATH}`);
+      await fs.mkdir(CLIENT_UPLOAD_PATH, { recursive: true });
   }
 
   for (const file of files) {
-    const sourcePath = path.join('public/uploads', file.filename);
-    const destPath = path.join(CLIENT_UPLOAD_PATH, file.filename);
+      const sourcePath = path.join('public/uploads', file.filename);
+      const destPath = path.join(CLIENT_UPLOAD_PATH, file.filename);
 
-    try {
-      await fs.copyFile(sourcePath, destPath);
-      console.log(`✅ 파일 복사 완료: ${destPath}`);
-    } catch (err) {
-      console.error(`❌ 파일 복사 실패: ${destPath}`, err);
-    }
+      try {
+          await fs.copyFile(sourcePath, destPath);
+          console.log(`✅ 파일 복사 완료: ${destPath}`);
+      } catch (err) {
+          console.error(`❌ 파일 복사 실패: ${destPath}`, err.message);
+      }
   }
 }
+
 
 // 📌 게시글 조회 (GET /api/posts)
 router.get('/api/posts', async (req, res) => {
