@@ -114,7 +114,7 @@ router.put(
   async (req, res) => {
     try {
       const postId = req.params.id;
-      const { title, content, deletedAttachments } = req.body;
+      const { title, source, content, deletedAttachments } = req.body;
 
       const existingPost = await Post.findById(postId);
       if (!existingPost) {
@@ -182,7 +182,7 @@ router.put(
       // 📌 MongoDB 업데이트
       const updatedPost = await Post.findByIdAndUpdate(
         postId,
-        { title, content, attachments: updatedAttachments },
+        { title, source, content, attachments: updatedAttachments },
         { new: true }
       );
 
