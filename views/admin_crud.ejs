@@ -65,7 +65,7 @@
                            data-bs-target="#viewPostModal"
                            data-title="<%= post.title %>"
                            data-source="<%= post.source %>"
-                           data-content='<%= post.content.replace(/"/g, "&quot;") %>'
+                           data-content='<%- post.content %>'
                            data-attachments='<%- JSON.stringify(post.attachments || []) %>'
                            data-created-at="<%= post.createdAt %>"
                            data-updated-at="<%= post.updatedAt %>">
