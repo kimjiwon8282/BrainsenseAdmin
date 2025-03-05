@@ -112,10 +112,15 @@
                     <h5 id="viewPostTitle" class="mb-0"></h5> <!-- 제목 왼쪽 정렬 -->
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="d-flex justify-content-between">
-                    <div></div> <!-- 빈 div로 공간 확보 -->
-                    <small id="viewPostTime" class="text-muted text-end me-3 mt-2"></small> <!-- 작성/수정 시간 오른쪽 정렬 -->
+                <div class="d-flex justify-content-end align-items-center">
+                    <small class="text-muted text-end">
+                        <span id="viewPostTime"></span>
+                        <span class="mx-2">|</span>
+                        <span id="viewPostSource"></span>
+                    </small>
                 </div>
+                
+                
                 <div class="modal-body">
                     <p id="viewPostContent" class="content-text">여기에 내용이 표시됩니다.</p>
                     <!-- 📌 첨부 파일 목록 (파일 다운로드 링크) -->
