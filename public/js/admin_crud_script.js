@@ -82,8 +82,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     location.reload();
                 },
                 error: function (error) {
-                    console.log("게시글 추가 오류", error);
-                    alert("게시글 추가에 실패했습니다.");
+                    console.log("게시글 추가 오류", error.responseJSON);
+                    if(error.responseJSON && error.responseJSON.error){
+                        alert("오류 : " + error.responseJSON.error);
+                    }else{
+                        alert("게시글 추가에 실패했습니다.");
+                    }
+                    
                 },
             });
         });

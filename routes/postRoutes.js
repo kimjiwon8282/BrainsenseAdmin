@@ -24,7 +24,14 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 5 * 1024 * 1024, files : 5 },
+  fileFilter : (req, file, cb) => {
+    const allowedExtensions = /\.(png|jpg|jpeg|gif|webp|svg|pdf|docx)$/i;
+    if(!allowedExtensions.test(file.originalname)){
+      return cb(new Error("허용되지 않는 파일 형식입니다."));
+    }
+    cb(null, true);
+  }
 });
 
 // 📌 파일을 클라이언트 폴더에도 복사하는 함수
@@ -64,7 +71,12 @@ router.get('/api/posts', async (req, res) => {
 // 📌 새 게시글 추가 (파일 업로드 포함)
 router.post('/api/posts', upload.array('attachments', 5), async (req, res) => {
   try {
-    const { title, content, source } = req.body;
+    const { title, content, source } = req.body;4
+    // multer error 처리
+    if(req.files.length > 5){
+      return res.status(400).json({error : "최대 5개의 파일만 업로드 할 수 있습니다."});
+    }
+
     const files = req.files || [];
     // 📌 업로드 개수 확인
     if (files.length > 5) {
@@ -84,6 +96,9 @@ router.post('/api/posts', upload.array('attachments', 5), async (req, res) => {
     res.status(201).json(newPost);
   } catch (err) {
     console.error('게시글 추가 오류:', err);
+    if(err.message === "File too large"){
+      return res.status(400).json({error:"파일 크기가 5MB를 초과했습니다."});
+    }
     res.status(500).json({ error: '서버 오류 발생' });
   }
 });
