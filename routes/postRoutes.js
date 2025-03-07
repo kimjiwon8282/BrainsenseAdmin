@@ -17,45 +17,74 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname).toLowerCase(); // 확장자 추출
-    const newFilename = `${Date.now()}${ext}`; // UUID + 안전한 파일명
-    cb(null, newFilename);
+
+    // 한글 깨짐 방지
+    const originalName = Buffer.from(file.originalname, 'latin1').toString(
+      'utf8'
+    );
+    const safeName = `${Date.now()}${ext}`; // 안전한 파일명
+
+    console.log('저장할 파일 정보 : ', { originalName, safeName });
+
+    if (!req.filesInfo) req.filesInfo = [];
+    req.filesInfo.push({
+      originalName: originalName,
+      safeName: `/uploads/${safeName}`,
+    });
+    cb(null, safeName);
   },
 });
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024, files : 5 , fieldSize:10*1024*1024, fieldNameSize:255},
-  fileFilter : (req, file, cb) => {
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    files: 5,
+    fieldSize: 10 * 1024 * 1024,
+    fieldNameSize: 255,
+  },
+  fileFilter: (req, file, cb) => {
     const allowedExtensions = /\.(png|jpg|jpeg|gif|webp|svg|pdf|docx)$/i;
-    if(!allowedExtensions.test(file.originalname)){
-      return cb(new Error("허용되지 않는 파일 형식입니다."));
+    if (!allowedExtensions.test(file.originalname)) {
+      return cb(new Error('허용되지 않는 파일 형식입니다.'));
     }
     cb(null, true);
-  }
+  },
 });
 
 // 📌 파일을 클라이언트 폴더에도 복사하는 함수
-async function copyToClientFolder(files) {
+async function copyToClientFolder(filesInfo) {
   try {
-      await fs.access(CLIENT_UPLOAD_PATH);
+    await fs.access(CLIENT_UPLOAD_PATH);
   } catch (err) {
-      console.warn(`📂 클라이언트 폴더가 없어서 생성 중: ${CLIENT_UPLOAD_PATH}`);
-      await fs.mkdir(CLIENT_UPLOAD_PATH, { recursive: true });
+    console.warn(`📂 클라이언트 폴더가 없어서 생성 중: ${CLIENT_UPLOAD_PATH}`);
+    await fs.mkdir(CLIENT_UPLOAD_PATH, { recursive: true });
   }
 
-  for (const file of files) {
-      const sourcePath = path.join('public/uploads', file.filename);
-      const destPath = path.join(CLIENT_UPLOAD_PATH, file.filename);
+  for (const file of filesInfo) {
+    // ✅ safeName이 유효한지 확인
+    if (!file.safeName) {
+      console.warn(`안전한 파일 이름이 없습니다. 파일을 건너뜁니다:`, file);
+      continue; // safeName이 없는 경우 해당 파일 건너뛰기
+    }
+    const safeFileName = path.basename(file.safeName || file.filename);
+    const sourcePath = path.join(
+      'public/uploads',
+      safeFileName
+    );
+    const destPath = path.join(
+      CLIENT_UPLOAD_PATH,
+      safeFileName
+    );
 
-      try {
-          await fs.copyFile(sourcePath, destPath);
-          console.log(`✅ 파일 복사 완료: ${destPath}`);
-      } catch (err) {
-          console.error(`❌ 파일 복사 실패: ${destPath}`, err.message);
-      }
+    try {
+      await fs.copyFile(sourcePath, destPath);
+      console.log(`✅ 파일 복사 완료: ${destPath}`);
+    } catch (err) {
+      console.error(`❌ 파일 복사 실패: ${destPath}`, err.message);
+    }
   }
 }
-
 
 // 📌 게시글 조회 (GET /api/posts)
 router.get('/api/posts', async (req, res) => {
@@ -71,33 +100,41 @@ router.get('/api/posts', async (req, res) => {
 // 📌 새 게시글 추가 (파일 업로드 포함)
 router.post('/api/posts', upload.array('attachments', 5), async (req, res) => {
   try {
-    const { title, content, source } = req.body;4
+    const { title, content, source } = req.body;
+    const filesInfo = req.filesInfo || [];
+
     // multer error 처리
-    if(req.files.length > 5){
-      return res.status(400).json({error : "최대 5개의 파일만 업로드 할 수 있습니다."});
+    if (req.filesInfo.length > 5) {
+      return res
+        .status(400)
+        .json({ error: '최대 5개의 파일만 업로드 할 수 있습니다.' });
     }
 
-    const files = req.files || [];
     // 📌 업로드 개수 확인
-    if (files.length > 5) {
+    if (filesInfo.length > 5) {
       return res
         .status(400)
         .json({ error: '최대 업로드 파일 수(5개)를 초과했습니다.' });
     }
 
-    const fileUrls = req.files.map((file) => `/uploads/${file.filename}`); // 파일 URL 생성
+    console.log('저장할 파일 목록 : ', req.filesInfo);
 
     // 📌 클라이언트 폴더에도 복사 실행
-    await copyToClientFolder(files);
+    await copyToClientFolder(filesInfo);
 
-    const newPost = new Post({ title, source, content, attachments: fileUrls });
+    const newPost = new Post({
+      title,
+      source,
+      content,
+      attachments: filesInfo,
+    });
     await newPost.save();
 
     res.status(201).json(newPost);
   } catch (err) {
     console.error('게시글 추가 오류:', err);
-    if(err.message === "File too large"){
-      return res.status(400).json({error:"파일 크기가 5MB를 초과했습니다."});
+    if (err.message === 'File too large') {
+      return res.status(400).json({ error: '파일 크기가 5MB를 초과했습니다.' });
     }
     res.status(500).json({ error: '서버 오류 발생' });
   }
@@ -144,11 +181,11 @@ router.put(
       if (deletedAttachments) {
         const filesToDelete = JSON.parse(deletedAttachments);
         updatedAttachments = updatedAttachments.filter(
-          (file) => !filesToDelete.includes(file)
+          (file) => !filesToDelete.some((del) => del.safeName === file.safeName)
         );
 
         for (const file of filesToDelete) {
-          const filePath = path.join(__dirname, '..', 'public', file);
+          const filePath = path.join(__dirname, '..', 'public', file.safeName);
           try {
             await fs.access(filePath);
             await fs.unlink(filePath);
@@ -159,9 +196,10 @@ router.put(
         }
 
         // 📌 클라이언트 폴더에서도 삭제 실행
-        await deleteFromClientFolder(filesToDelete);
+        await deleteFromClientFolder(
+          filesToDelete.map((file) => file.safeName)
+        );
       }
-
       // 📌 업로드 가능한 파일 개수 확인
       const remainFiles = 5 - updatedAttachments.length;
       if (req.files.length > remainFiles) {
@@ -188,10 +226,7 @@ router.put(
 
       // 📌 새 파일 추가
       if (req.files.length > 0) {
-        const newAttachments = req.files.map(
-          (file) => `/uploads/${file.filename}`
-        );
-        updatedAttachments = [...updatedAttachments, ...newAttachments];
+        updatedAttachments = [...updatedAttachments, ...req.filesInfo];
         // 📌 클라이언트 폴더에도 복사
         await copyToClientFolder(req.files);
       }
@@ -221,8 +256,15 @@ router.delete('/api/posts/:id', async (req, res) => {
 
     // 📌 첨부된 파일 삭제
     if (deletedPost.attachments && Array.isArray(deletedPost.attachments)) {
-      for (const filePath of deletedPost.attachments) {
-        const fullPath = path.join(__dirname, '..', 'public', filePath);
+      for (const attachment of deletedPost.attachments) {
+        const safeName = path.basename(attachment.safeName);
+        const fullPath = path.join(
+          __dirname,
+          '..',
+          'public',
+          'uploads',
+          safeName
+        );
         console.log(`📁 삭제 시도 파일 경로: ${fullPath}`);
 
         try {
@@ -237,7 +279,9 @@ router.delete('/api/posts/:id', async (req, res) => {
           }
         }
       }
-      await deleteFromClientFolder(deletedPost.attachments);
+      await deleteFromClientFolder(
+        deletedPost.attachments.map((file) => file.safeName)
+      );
     }
 
     res.json({ message: '게시글과 관련된 첨부 파일이 삭제되었습니다.' });
