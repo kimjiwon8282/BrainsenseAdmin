@@ -95,123 +95,124 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // 📌 게시글 수정 (Update)
-  let editModal = document.getElementById('editModal');
-  let deletedAttachments = []; // 삭제된 파일 목록 저장
+let editModal = document.getElementById('editModal');
+let deletedAttachments = []; // 삭제된 파일 목록 저장
 
-  if (editModal) {
-    document.addEventListener('click', function (event) {
-      let button = event.target.closest("[data-bs-target='#editModal']");
-      if (button) {
-        let postId = button.getAttribute('data-id');
-        let postTitle = button.getAttribute('data-title');
-        let postSource = button.getAttribute('data-source');
-        let postContent = button.getAttribute('data-content');
-        let attachments = JSON.parse(
-          button.getAttribute('data-attachments') || '[]'
-        );
+if (editModal) {
+  document.addEventListener('click', function (event) {
+    let button = event.target.closest("[data-bs-target='#editModal']");
+    if (button) {
+      let postId = button.getAttribute('data-id');
+      let postTitle = button.getAttribute('data-title');
+      let postSource = button.getAttribute('data-source');
+      let postContent = button.getAttribute('data-content');
+      let attachments = JSON.parse(
+        button.getAttribute('data-attachments') || '[]'
+      );
 
-        console.log('받아온 첨부 파일 목록:', attachments); // 🛠 확인용 로그
+      console.log('받아온 첨부 파일 목록:', attachments); // 🛠 확인용 로그
 
-        document.getElementById('postId').value = postId;
-        document.getElementById('postTitle').value = postTitle;
-        document.getElementById('postSource').value = postSource;
-        editQuill.root.innerHTML = '';
-        editQuill.clipboard.dangerouslyPasteHTML(postContent);
+      document.getElementById('postId').value = postId;
+      document.getElementById('postTitle').value = postTitle;
+      document.getElementById('postSource').value = postSource;
+      editQuill.root.innerHTML = '';
+      editQuill.clipboard.dangerouslyPasteHTML(postContent);
 
-        deletedAttachments = [];
+      deletedAttachments = [];
 
-        // 📌 기존 첨부 파일(이미지 + 문서) 미리보기 추가
-        let editAttachmentsContainer = document.getElementById(
-          'editAttachmentsContainer'
-        );
-        editAttachmentsContainer.innerHTML = '';
+      // 📌 기존 첨부 파일(이미지 + 문서) 미리보기 추가
+      let editAttachmentsContainer = document.getElementById(
+        'editAttachmentsContainer'
+      );
+      editAttachmentsContainer.innerHTML = '';
 
-        if (attachments.length > 0) {
-          attachments.forEach((file) => {
-            editAttachmentsContainer.innerHTML += `
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="${
-                                  file.safeName
-                                }" target="_blank" download class="text-decoration-none">${
-              file.originalName
-            }</a>
-                                <button class="btn btn-sm btn-danger remove-attachment" data-file="${JSON.stringify(
-                                  file
-                                )}">
-                                    삭제
-                                </button>
-                            </li>
-                        `;
-          });
-          editAttachmentsContainer.innerHTML += '</ul>';
-        } else {
-          editAttachmentsContainer.innerHTML =
-            "<p class='text-muted'>첨부된 파일이 없습니다.</p>";
-        }
-      }
-    });
-
-    // 📌 동적 이벤트 위임 (기존 파일 삭제 버튼 동작)
-    document.addEventListener('click', function (event) {
-      if (event.target.classList.contains('remove-attachment')) {
-        let fileData = JSON.parse(event.target.getAttribute('data-file'));
-        deletedAttachments.push(fileData);
-        event.target.parentElement.remove(); // 리스트에서 제거
-      }
-    });
-
-    var editForm = document.getElementById('editForm');
-    if (editForm) {
-      editForm.addEventListener('submit', function (event) {
-        event.preventDefault();
-        document.getElementById('editPostContent').value =
-          editQuill.root.innerHTML;
-
-        let postId = document.getElementById('postId').value;
-        let formData = new FormData(editForm);
-        formData.append(
-          'deletedAttachments',
-          JSON.stringify(deletedAttachments)
-        );
-
-        $.ajax({
-          url: '/api/posts/' + postId,
-          method: 'PUT',
-          processData: false,
-          contentType: false,
-          data: formData,
-          success: function () {
-            alert('게시글이 수정되었습니다.');
-            location.reload();
-          },
-          error: function (error) {
-            console.log('수정 오류', error);
-            alert('수정에 실패했습니다.');
-          },
+      if (attachments.length > 0) {
+        attachments.forEach((file) => {
+          editAttachmentsContainer.innerHTML += `
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="${file.safeName}" target="_blank" download class="text-decoration-none">
+                  ${file.originalName}
+                </a>
+                <button class="btn btn-sm btn-danger remove-attachment" 
+                        data-file-safe-name="${file.safeName}" 
+                        data-file-original-name="${file.originalName}">
+                    삭제
+                </button>
+            </li>`;
         });
-      });
+      } else {
+        editAttachmentsContainer.innerHTML =
+          "<p class='text-muted'>첨부된 파일이 없습니다.</p>";
+      }
     }
-  }
+  });
 
-  // 📌 새 파일 선택 시 업로드한 파일 목록 표시
-  var editPostAttachments = document.getElementById('editPostAttachments');
-  var attachmentPreview = document.getElementById('attachmentPreview');
+  // 📌 동적 이벤트 위임 (기존 파일 삭제 버튼 동작)
+  document.addEventListener('click', function (event) {
+    if (event.target.classList.contains('remove-attachment')) {
+      const safeName = event.target.getAttribute('data-file-safe-name');
+      const originalName = event.target.getAttribute('data-file-original-name');
+      if (safeName && originalName) {
+        deletedAttachments.push({ safeName, originalName });
+        event.target.parentElement.remove(); // 리스트에서 제거
+        console.log('삭제된 첨부 파일 목록:', deletedAttachments);
+      }
+    }
+  });
 
-  if (editPostAttachments) {
-    editPostAttachments.addEventListener('change', function () {
-      attachmentPreview.innerHTML = '';
-      let fileList = "<h6>📎 업로드된 파일 목록</h6><ul class='list-group'>";
+  var editForm = document.getElementById('editForm');
+  if (editForm) {
+    editForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      document.getElementById('editPostContent').value =
+        editQuill.root.innerHTML;
 
-      Array.from(editPostAttachments.files).forEach((file) => {
-        fileList += `
-                    <li class="list-group-item">${file.name}</li>
-                `;
+      let postId = document.getElementById('postId').value;
+      let formData = new FormData(editForm);
+      formData.append(
+        'deletedAttachments',
+        JSON.stringify(deletedAttachments)
+      );
+
+      $.ajax({
+        url: '/api/posts/' + postId,
+        method: 'PUT',
+        processData: false,
+        contentType: false,
+        data: formData,
+        success: function () {
+          alert('게시글이 수정되었습니다.');
+          location.reload();
+        },
+        error: function (error) {
+          console.log('수정 오류', error);
+          alert('수정에 실패했습니다.');
+        },
       });
-
-      fileList += '</ul>';
-      attachmentPreview.innerHTML = fileList;
     });
   }
+}
+
+// 📌 새 파일 선택 시 업로드한 파일 목록 표시
+var editPostAttachments = document.getElementById('editPostAttachments');
+var attachmentPreview = document.getElementById('attachmentPreview');
+
+if (editPostAttachments) {
+  editPostAttachments.addEventListener('change', function () {
+    attachmentPreview.innerHTML = '';
+    let fileList = "<h6>📎 업로드된 파일 목록</h6><ul class='list-group'>";
+
+    Array.from(editPostAttachments.files).forEach((file) => {
+      fileList += `
+        <li class="list-group-item">${file.name}</li>
+      `;
+    });
+
+    fileList += '</ul>';
+    attachmentPreview.innerHTML = fileList;
+  });
+}
+
 
   // 📌 게시글 보기 (Read)
   var viewPostModal = document.getElementById('viewPostModal');
