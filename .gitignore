@@ -1,5 +1,6 @@
 .env
-.node_modules
+/node_modules
+public/uploads
 # Created by https://www.toptal.com/developers/gitignore/api/macos,git
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,git
 
@@ -52,3 +53,5 @@ Temporary Items
 *.icloud
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,git
+
+public/uploads

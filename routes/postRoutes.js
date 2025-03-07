@@ -24,8 +24,6 @@ const storage = multer.diskStorage({
     );
     const safeName = `${Date.now()}${ext}`; // 안전한 파일명
 
-    console.log('저장할 파일 정보 : ', { originalName, safeName });
-
     if (!req.filesInfo) req.filesInfo = [];
     req.filesInfo.push({
       originalName: originalName,
@@ -82,7 +80,7 @@ async function copyToClientFolder(filesInfo) {
 
     try {
       await fs.copyFile(sourcePath, destPath);
-      console.log(`✅ 파일 복사 완료: ${destPath}`);
+      // console.log(`✅ 파일 복사 완료: ${destPath}`);
     } catch (err) {
       console.error(`❌ 파일 복사 실패: ${destPath}`, err.message);
     }
@@ -114,7 +112,7 @@ router.post('/api/posts', upload.array('attachments', 5), async (req, res) => {
         .json({ error: '최대 5개의 파일만 업로드 할 수 있습니다.' });
     }
 
-    console.log('저장할 파일 목록 : ', req.filesInfo);
+    // console.log('저장할 파일 목록 : ', req.filesInfo);
 
     // 📌 클라이언트 폴더에도 복사 실행
     await copyToClientFolder(filesInfo);
@@ -144,7 +142,7 @@ async function deleteFromClientFolder(filePaths) {
     try {
       await fs.access(clientFilePath);
       await fs.unlink(clientFilePath);
-      console.log(`✅ 클라이언트 파일 삭제 완료: ${clientFilePath}`);
+      // console.log(`✅ 클라이언트 파일 삭제 완료: ${clientFilePath}`);
     } catch (err) {
       if (err.code === 'ENOENT') {
         console.warn(`⚠️ 클라이언트 폴더에 파일 없음: ${clientFilePath}`);
@@ -186,7 +184,7 @@ router.put(
           try {
             await fs.access(filePath);
             await fs.unlink(filePath);
-            console.log(`✅ 서버에서 삭제된 파일: ${filePath}`);
+            // console.log(`✅ 서버에서 삭제된 파일: ${filePath}`);
           } catch (err) {
             console.error(`❌ 서버 파일 삭제 실패: ${filePath}`, err.message);
           }
@@ -211,7 +209,7 @@ router.put(
           try {
             await fs.access(filePath);
             await fs.unlink(filePath);
-            console.log(`⚠️ 초과 파일 삭제됨: ${filePath}`);
+            // console.log(`⚠️ 초과 파일 삭제됨: ${filePath}`);
           } catch (err) {
             console.error(`❌ 초과 파일 삭제 실패 (${filePath}):`, err.message);
           }
@@ -262,12 +260,12 @@ router.delete('/api/posts/:id', async (req, res) => {
           'uploads',
           safeName
         );
-        console.log(`📁 삭제 시도 파일 경로: ${fullPath}`);
+        // console.log(`📁 삭제 시도 파일 경로: ${fullPath}`);
 
         try {
           await fs.access(fullPath);
           await fs.unlink(fullPath);
-          console.log(`✅ 삭제된 파일: ${fullPath}`);
+          // console.log(`✅ 삭제된 파일: ${fullPath}`);
         } catch (err) {
           if (err.code === 'ENOENT') {
             console.warn(`⚠️ 파일이 이미 존재하지 않음: ${fullPath}`);
