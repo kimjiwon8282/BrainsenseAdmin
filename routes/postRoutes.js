@@ -44,6 +44,9 @@ const upload = multer({
     fieldNameSize: 255,
   },
   fileFilter: (req, file, cb) => {
+    if(!file.originalname){
+      return cb(new Error("파일 이름이 없습니다."));
+    }
     const allowedExtensions = /\.(png|jpg|jpeg|gif|webp|svg|pdf|docx)$/i;
     if (!allowedExtensions.test(file.originalname)) {
       return cb(new Error('허용되지 않는 파일 형식입니다.'));
@@ -100,21 +103,15 @@ router.get('/api/posts', async (req, res) => {
 // 📌 새 게시글 추가 (파일 업로드 포함)
 router.post('/api/posts', upload.array('attachments', 5), async (req, res) => {
   try {
-    const { title, content, source } = req.body;
     const filesInfo = req.filesInfo || [];
+    const { title, content, source } = req.body;
+    
 
     // multer error 처리
-    if (req.filesInfo.length > 5) {
-      return res
-        .status(400)
-        .json({ error: '최대 5개의 파일만 업로드 할 수 있습니다.' });
-    }
-
-    // 📌 업로드 개수 확인
     if (filesInfo.length > 5) {
       return res
         .status(400)
-        .json({ error: '최대 업로드 파일 수(5개)를 초과했습니다.' });
+        .json({ error: '최대 5개의 파일만 업로드 할 수 있습니다.' });
     }
 
     console.log('저장할 파일 목록 : ', req.filesInfo);
