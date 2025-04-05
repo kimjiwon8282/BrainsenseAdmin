@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function () {
           attachments.forEach((file) => {
             editAttachmentsContainer.innerHTML += `
             <li class="list-group-item d-flex justify-content-between align-items-center">
-                <a href="${file.safeName}" target="_blank" download class="text-decoration-none">
+                <a href="${file.cloudPath}" target="_blank" download class="text-decoration-none">
                   ${file.originalName}
                 </a>
                 <button class="btn btn-sm btn-danger remove-attachment" 
@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', function () {
           attachments.forEach((file) => {
             fileList += `
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="${file.safeName}" target="_blank" download class="text-decoration-none">${file.originalName}</a>
+                                <a href="${file.cloudPath}" target="_blank" download class="text-decoration-none">${file.originalName}</a>
                                 <button class="btn btn-sm btn-primary download-btn" data-file="${file.safeName}" data-filename="${file.originalName}">
                                     다운로드
                                 </button>
