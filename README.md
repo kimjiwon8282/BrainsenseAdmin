@@ -19,7 +19,7 @@ Node.js와 Express를 기반으로 EJS 템플릿을 활용해 관리 기능을 �
 ---
 
 ## 📷 시스템 아키텍처  
-![시스템 플로우](assets/flow.png)  
+![시스템 플로우](assets/flow.PNG)  
 > Client 서버와 Admin 서버가 동일한 MongoDB 인스턴스를 공유하며,  
 > Admin에서는 주문·뉴스·사용자 관리를 담당합니다.
 
