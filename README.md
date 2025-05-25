@@ -1,74 +1,46 @@
-# brainsenseWeb
-🚀 회사 홈페이지 개발 프로젝트
+# BrainsenseAdmin  
+🚀 스타트업 홈페이지 관리자 페이지 개발 프로젝트
 
-# 🏢 프로젝트명
-brainsense 공식 홈페이지 제작
+# 🏢 프로젝트명  
+Brainsense 관리자 페이지 제작
 
-## 📌 프로젝트 개요
-본 프로젝트는 회사의 공식 홈페이지를 개발하는 팀 프로젝트입니다.  
-HTML, CSS, JavaScript, EJS Template, NODE.JS, MongoDB 등을 활용하여 반응형 웹사이트를 제작합니다.
-
----
-
-## 🚀 주요 기능
-- 회사 소개 페이지
-- 서비스 및 제품 페이지
-- 연락처 및 문의 양식
-- 반응형 웹 디자인
-- (추후 추가 예정)
+## 📌 프로젝트 개요  
+브레인센스 스타트업의 관리자 전용 인터페이스를 제공하는 웹 애플리케이션입니다.  
+Node.js와 Express를 기반으로 EJS 템플릿을 활용해 관리 기능을 구현하고, MongoDB를 통해 데이터를 안전하게 저장·조회합니다.
 
 ---
 
-## 🛠 사용 기술
-- **Frontend:** HTML, CSS, JavaScript (Vanilla JS)
-- **Backend:** Server / Node.JS(Express 기반) DB / MongoDB(NoSQL)
-- **Templating:** EJS
-- **Version Control:** Git, GitHub
-- **Deployment:** (Cafe24, AWS 등 외부 호스팅)
+## 🚀 주요 기능  
+- **관리자 회원가입 및 인증**  
+- **주문 처리 기능**: 1:1 문의(외주 요청) 접수·조회·상태 변경  
+- **뉴스 게시 기능**: 공지사항·뉴스 등록·수정·삭제  
+- **구글 애널리틱스 연동**: 관리자용 대시보드에서 방문자 통계 확인  
 
 ---
 
-## 📂 프로젝트 구조
-- 추가 예정
-
-## 💻 협업 방법
-- 추가 예정  
-
----
-
-## 🗄 Order 테이블 (외주 요청 관리)
-외주 요청을 관리하기 위해 MongoDB에 `Order` 테이블을 생성합니다.  
-이 테이블은 **외주 주문 내역을 저장**하며, 주문의 진행 상태를 추적할 수 있습니다.
-
-### 📂 Order 테이블 필드 정의
-| 필드명              | 타입             | 필수 여부 | 설명 |
-|-------------------|----------------|---------|----------------------------------|
-| `_id`            | `ObjectId`      | ✅       | **PK**, MongoDB 자동 생성 식별자 |
-| `orderNumber`    | `String`        | ✅       | 주문번호 (예: `ORD20250001`), **고유값** |
-| `companyName`    | `String`        | ✅       | 외주를 의뢰한 **회사 이름** |
-| `companyAddress` | `String`        | ✅       | 외주 회사의 **주소** |
-| `companyEmail`   | `String`        | ✅       | 외주 회사의 **이메일** |
-| `companyPhone`   | `String`        | ✅       | 외주 회사의 **전화번호** |
-| `orderType`      | `String (enum)` | ✅       | **외주 유형** (예: `소프트웨어`, `센서`, `기타`) |
-| `details`        | `String`        | ✅       | **세부 문의 사항** |
-| `privacyConsent` | `Boolean`       | ✅       | **개인정보 수집 동의 여부** (`true / false`) |
-| `timestamp`      | `Date`          | ✅       | **요청 생성 시간** (자동 추가) |
-| `status`         | `String (enum)` | ✅       | **진행 상태** (`처리전`, `진행중`, `완료`) |
+## 📷 시스템 아키텍처  
+![시스템 플로우](assets/flow.png)  
+> Client 서버와 Admin 서버가 동일한 MongoDB 인스턴스를 공유하며,  
+> Admin에서는 주문·뉴스·사용자 관리를 담당합니다.
 
 ---
 
-### 📌 Order 테이블 사용 예시
-```json
-{
-    "_id": "65a8e3a2f0b5c00bdf123456",
-    "orderNumber": "ORD20250001",
-    "companyName": "BrainSense Corp.",
-    "companyAddress": "Seoul, South Korea",
-    "companyEmail": "contact@brainsense.com",
-    "companyPhone": "+82-10-1234-5678",
-    "orderType": "소프트웨어",
-    "details": "AI 기반 IoT 솔루션 개발 요청",
-    "privacyConsent": true,
-    "timestamp": "2025-02-10T14:25:36.000Z",
-    "status": "처리전"
-}
+## 🏠 관리자 홈 화면  
+![관리자 홈](assets/home.png)  
+> 로그인 후 관리자 대시보드로 이동해 주요 통계를 한눈에 확인할 수 있습니다.
+
+---
+
+## 📝 뉴스 게시 기능  
+![뉴스 등록 화면](assets/new_report.png)  
+> 제목, 본문, 대표 이미지 업로드를 통해 새로운 공지사항 및 소식을 등록합니다.
+
+---
+
+## 📦 주문 처리 기능  
+![주문 관리 화면](assets/order.png)  
+> 접수된 1:1 문의 목록을 조회·필터링하고, 상태(대기·처리완료)를 변경할 수 있습니다.
+
+---
+
+**⚠️ 이 리포지토리는 관리자 서버 구현 전용 저장소입니다.**
