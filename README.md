@@ -110,3 +110,131 @@ app.get('/main', (req, res) => {
 });
 app.use(postRoutes);
 app.use(orderRoutes);
+```
+
+### JWT + httpOnly 쿠키 로그인 (`adminLogin.js`)  
+```js
+const token = jwt.sign({ adminId: admin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+res.cookie('token', token, {
+  httpOnly: true,
+  secure: false, // HTTPS 환경에서 true
+  maxAge: 60 * 60 * 1000
+});
+```
+
+### Google Cloud Storage 업로드 (postRoutes.js)
+```js
+async function uploadFileToGCS(fileBuffer, filename) {
+  const bucket = storageClient.bucket(GCLOUD_BUCKET);
+  const destination = `news/${filename}`;
+  await bucket.file(destination).save(fileBuffer, { public: true });
+  return `https://storage.googleapis.com/${GCLOUD_BUCKET}/${destination}`;
+}
+```
+
+### Google Cloud Storage 업로드 (postRoutes.js)
+```js
+async function uploadFileToGCS(fileBuffer, filename) {
+  const bucket = storageClient.bucket(GCLOUD_BUCKET);
+  const destination = `news/${filename}`;
+  await bucket.file(destination).save(fileBuffer, { public: true });
+  return `https://storage.googleapis.com/${GCLOUD_BUCKET}/${destination}`;
+}
+```
+
+### **2. 관리자 보안: 3단계 인증 절차**
+
+이 프로젝트는 단순히 아이디와 비밀번호만으로 관리자를 생성하지 않습니다.  
+**이메일 소유 인증 → 최고 관리자의 승인 요청 → 최종 승인**  
+이라는 체계적인 3단계 절차를 통해 인가된 사용자만이 관리자 권한을 가질 수 있도록 설계되었습니다.
+
+---
+
+#### → 1단계: 이메일 인증 (Email Verification)
+
+```jsx
+// middlewares/emailAuth.js
+
+// 1. 임시 인증 코드를 저장할 Map 객체
+const verificationCodes = new Map();
+
+// 2. 인증 코드 생성 및 이메일 발송 함수
+const sendVerification = async (req, res) => {
+  // ... (중복 이메일 체크) ...
+
+  // 6자리 난수 코드 생성
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  
+  // 메모리에 이메일과 코드를 5분간 저장
+  verificationCodes.set(email, code);
+  setTimeout(() => {
+    verificationCodes.delete(email);
+  }, 5 * 60 * 1000); // 5분 후 자동 삭제
+
+  // Nodemailer를 통해 인증 코드 발송
+  await smtpTransport.sendMail(mailOptions);
+  res.status(200).json({ message: '이메일 인증 요청이 전송되었습니다.' });
+};
+```
+#### → 2단계: 관리자 승인 요청 (Approval Request)
+
+```jsx
+// middlewares/registerMail.js
+
+const registerAdmin = async (req, res) => {
+  // ... (가입 정보 유효성 검사) ...
+
+  const newAdmin = new Admin({
+    // ... (사용자 정보)
+    approved: false, // 📌 초기 상태는 '미승인'
+  });
+
+  await newAdmin.save(); // DB에 미승인 상태로 저장
+
+  // 최고 관리자에게 승인 요청 이메일 전송
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const mailOptions = {
+    from: process.env.MAIL_USER,
+    to: adminEmail,
+    subject: '새로운 관리자 회원가입 요청',
+    html: `<p>새로운 관리자 가입 요청</p>
+           ...
+           <a href="http://localhost:8081/admin/approve?email=${email}">승인하기</a>`,
+  };
+
+  await smtpTransport.sendMail(mailOptions);
+};
+```
+#### → 3단계: 최종 승인 (Final Approval)
+```jsx
+// routes/adminApprove.js
+
+router.get('/approve', async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    // 해당 이메일 사용자를 찾아 'approved' 상태를 true로 업데이트
+    const updatedAdmin = await Admin.findOneAndUpdate(
+      { email },
+      { approved: true },
+      { new: true }
+    );
+
+    // 승인된 관리자에게 최종 안내 이메일 전송
+    const mailOptions = {
+      from: process.env.MAIL_USER,
+      to: email,
+      subject: '관리자 계정 승인 완료',
+      html: `<p>귀하의 관리자 계정이 승인되었습니다. 이제 로그인 할 수 있습니다.<p>`,
+    };
+    await smtpTransport.sendMail(mailOptions);
+
+    res.render('admin_approve', { email }); // 승인 완료 페이지
+  } catch (error) {
+    // ... (에러 처리)
+  }
+});
+```
+
+
+
