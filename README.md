@@ -52,7 +52,45 @@ MongoDB Atlas(클라우드 DB)를 통해 데이터 관리 및 안정성을 확�
 > 클라이언트 페이지와 관리자 페이지는 동일한 MongoDB 인스턴스를 공유합니다.  
 > 관리자 페이지는 주문/뉴스/사용자 관리를 담당하며, 파일은 **Google Cloud Storage**에 보관됩니다.  
 
----
+## 📷 시스템 아키텍처  
+
+**사진1: 시스템 플로우 다이어그램**  
+
+> 클라이언트 페이지와 관리자 페이지는 동일한 MongoDB 인스턴스를 공유합니다.  
+> 관리자 페이지는 주문/뉴스/사용자 관리를 담당하며, 파일은 **Google Cloud Storage**에 보관됩니다.  
+
+```mermaid
+flowchart LR
+    subgraph User[사용자(Client)]
+        C1[클라이언트 페이지<br/>회사소개/제품/뉴스 보기/주문 생성]
+    end
+
+    subgraph Admin[관리자(Admin)]
+        A1[관리자 페이지<br/>회원가입(3단계 보안)/로그인/뉴스 관리/주문 처리]
+    end
+
+    subgraph Server[Node.js + Express 서버]
+        S1[EJS 템플릿 렌더링]
+        S2[REST API<br/>주문/뉴스/관리자 인증]
+    end
+
+    subgraph DB[MongoDB Atlas]
+        D1[(사용자 정보)]
+        D2[(주문)]
+        D3[(뉴스)]
+        D4[(관리자 계정)]
+    end
+
+    subgraph Storage[Google Cloud Storage]
+        G1[(뉴스 이미지)]
+        G2[(첨부파일)]
+    end
+
+    C1 --> Server
+    A1 --> Server
+    Server --> DB
+    Server --> Storage
+```
 
 ## 🏠 주요 화면  
 
