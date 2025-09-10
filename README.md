@@ -48,13 +48,7 @@ MongoDB Atlas(클라우드 DB)를 통해 데이터 관리 및 안정성을 확�
 ## 📷 시스템 아키텍처  
 
 **사진1: 시스템 플로우 다이어그램**  
-
-> 클라이언트 페이지와 관리자 페이지는 동일한 MongoDB 인스턴스를 공유합니다.  
-> 관리자 페이지는 주문/뉴스/사용자 관리를 담당하며, 파일은 **Google Cloud Storage**에 보관됩니다.  
-
-## 📷 시스템 아키텍처  
-
-**사진1: 시스템 플로우 다이어그램**  
+![주문 관리 화면](assets/flow.png)  
 
 > 클라이언트 페이지와 관리자 페이지는 동일한 MongoDB 인스턴스를 공유합니다.  
 > 관리자 페이지는 주문/뉴스/사용자 관리를 담당하며, 파일은 **Google Cloud Storage**에 보관됩니다.  
@@ -63,13 +57,16 @@ MongoDB Atlas(클라우드 DB)를 통해 데이터 관리 및 안정성을 확�
 
 ## 🏠 주요 화면  
 
-- **사진2: 관리자 홈 화면**  
+- **사진2: 관리자 홈 화면**
+  ![관리자 홈 화면](assets/home.png)  
   > 로그인 후 주요 통계를 한눈에 확인  
 
-- **사진3: 뉴스 등록 화면**  
+- **사진3: 뉴스 등록 화면**
+  ![뉴스 등록 화면](assets/new_report.png)  
   > 제목, 본문, 이미지 업로드 지원  
 
-- **사진4: 주문 관리 화면**  
+- **사진4: 주문 관리 화면**
+  ![주문 관리 화면](assets/order.png)  
   > 접수된 1:1 문의 목록 조회 및 상태 변경  
 
 ---
@@ -127,16 +124,6 @@ res.cookie('token', token, {
   secure: false, // HTTPS 환경에서 true
   maxAge: 60 * 60 * 1000
 });
-```
-
-### Google Cloud Storage 업로드 (postRoutes.js)
-```js
-async function uploadFileToGCS(fileBuffer, filename) {
-  const bucket = storageClient.bucket(GCLOUD_BUCKET);
-  const destination = `news/${filename}`;
-  await bucket.file(destination).save(fileBuffer, { public: true });
-  return `https://storage.googleapis.com/${GCLOUD_BUCKET}/${destination}`;
-}
 ```
 
 ### Google Cloud Storage 업로드 (postRoutes.js)
